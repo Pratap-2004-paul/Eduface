@@ -1,0 +1,55 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.env/
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Databases
+*.db
+*.sqlite3
+
+# ML models
+*.pkl
+*.h5
+*.joblib
+
+# Dataset (usually large / private)
+dataset/
+*/dataset/
+
+# Uploads / generated data
+uploads/
+
+# JSON runtime files
+train_status.json
+
+# IDE
+.vscode/
+.idea/
+
+# OneDrive conflicts
+*.tmp
+*.bak
+
+# Ignore subproject venvs
+Attendance-System2/venv/
+eduface-1/venv/
+
+# Ignore cache in subprojects
+Attendance-System2/__pycache__/
+eduface-1/__pycache__/
+
+*.txt
+launcher.bat
+launcher.sh

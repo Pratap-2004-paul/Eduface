@@ -1,0 +1,300 @@
+<!-- Student dashboard -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduFace — Student Dashboard</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/dashboard.css" />
+</head>
+<body style="background:var(--slate-50)">
+
+<div class="dashboard-layout">
+
+  <!-- ═══ SIDEBAR ══════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">🎓</div>
+      <div class="sidebar-brand-text">Edu<span>Face</span></div>
+    </div>
+
+    <div class="sidebar-profile">
+      <div class="sidebar-avatar-wrap">
+        <div class="sidebar-avatar" id="sb-avatar">S</div>
+        <div class="sidebar-status-dot"></div>
+      </div>
+      <div>
+        <div class="sidebar-user-name" id="sb-name">Student</div>
+        <div class="sidebar-user-role" id="sb-dept">Department</div>
+        <div class="sidebar-user-id"  id="sb-uid">—</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Navigation</div>
+      <div class="nav-item active" data-section="home">
+        <span class="nav-icon">🏠</span> Home
+      </div>
+      <div class="nav-item" data-section="attendance">
+        <span class="nav-icon">📋</span> My Attendance
+      </div>
+      <div class="nav-item" data-section="chat">
+        <span class="nav-icon">💬</span> Messages
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="nav-item" id="logout-btn">
+        <span class="nav-icon">🚪</span> Logout
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ════════════════════════════════════ -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="topbar-title" id="topbar-title">Dashboard</div>
+          <div class="topbar-subtitle">Student Portal · EduFace</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div style="font-size:.82rem;color:var(--slate-400)" id="today-date"></div>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- ════ HOME ════ -->
+      <div class="student-section page-enter" id="section-home">
+        <div class="profile-dashboard">
+
+          <!-- Left: Profile Card -->
+          <div class="profile-card">
+            <div class="profile-card-header">
+              <div class="profile-photo-wrap">
+                <div class="profile-photo" id="profile-initials">S</div>
+                <img id="profile-photo" src="" alt="" style="display:none;width:100px;height:100px;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,.25);position:absolute;top:0;left:0" />
+              </div>
+              <div class="profile-name" id="profile-name">Student Name</div>
+              <div class="profile-role-badge">Student</div>
+            </div>
+            <div class="profile-card-body">
+              <div class="profile-field">
+                <span class="profile-field-icon">🏫</span>
+                <div>
+                  <div class="profile-field-label">Department</div>
+                  <div class="profile-field-value" id="pf-dept">—</div>
+                </div>
+              </div>
+              <div class="profile-field">
+                <span class="profile-field-icon">🎓</span>
+                <div>
+                  <div class="profile-field-label">Roll Number</div>
+                  <div class="profile-field-value" id="pf-rollno">—</div>
+                </div>
+              </div>
+              <div class="profile-field">
+                <span class="profile-field-icon">📧</span>
+                <div>
+                  <div class="profile-field-label">Email</div>
+                  <div class="profile-field-value" id="pf-email">—</div>
+                </div>
+              </div>
+              <div class="profile-field">
+                <span class="profile-field-icon">📱</span>
+                <div>
+                  <div class="profile-field-label">Mobile</div>
+                  <div class="profile-field-value" id="pf-mobile">—</div>
+                </div>
+              </div>
+              <div class="profile-field">
+                <span class="profile-field-icon">🪪</span>
+                <div>
+                  <div class="profile-field-label">User ID</div>
+                  <div class="profile-field-value" id="pf-userid">—</div>
+                </div>
+              </div>
+              <div class="profile-field">
+                <span class="profile-field-icon">📅</span>
+                <div>
+                  <div class="profile-field-label">Joined</div>
+                  <div class="profile-field-value" id="pf-joined">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Actions & Summary -->
+          <div>
+            <h2 style="margin-bottom:8px">Welcome, <span id="profile-name-greeting" style="color:var(--indigo-700)">Student</span>! 👋</h2>
+            <p class="text-muted mb-24">Here's your academic overview at a glance.</p>
+
+            <!-- Summary Stats -->
+            <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+              <div class="stat-card">
+                <div class="stat-icon stat-icon-green">📊</div>
+                <div>
+                  <div class="stat-value" id="home-stat-pct" style="font-size:1.4rem">—%</div>
+                  <div class="stat-label">Attendance</div>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon stat-icon-indigo">📋</div>
+                <div>
+                  <div class="stat-value" id="home-stat-sessions" style="font-size:1.4rem">0</div>
+                  <div class="stat-label">Sessions</div>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon stat-icon-amber">💬</div>
+                <div>
+                  <div class="stat-value" id="home-stat-chats" style="font-size:1.4rem">0</div>
+                  <div class="stat-label">Messages</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="quick-actions">
+              <div class="action-card" id="action-attendance">
+                <div class="action-icon action-icon-attend">📋</div>
+                <div class="action-title">My Attendance</div>
+                <div class="action-desc">View subject-wise attendance records. See which sessions you were present or absent.</div>
+                <button class="btn btn-primary btn-full mt-12">View Attendance →</button>
+              </div>
+              <div class="action-card" id="action-chat">
+                <div class="action-icon action-icon-chat">💬</div>
+                <div class="action-title">Open Chat</div>
+                <div class="action-desc">Message your teachers about doubts, assignments, or any academic queries.</div>
+                <button class="btn btn-outline btn-full mt-12">Open Messages →</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ════ ATTENDANCE ════ -->
+      <div class="student-section hidden page-enter" id="section-attendance">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h2>📋 My Attendance</h2>
+            <p>Subject-wise attendance records for all your classes.</p>
+          </div>
+        </div>
+
+        <!-- Overall Stats -->
+        <div class="panel mb-24">
+          <div class="panel-header">
+            <div class="panel-title">Overall Attendance Summary</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px">
+            <div style="text-align:center;padding:12px;background:var(--slate-50);border-radius:var(--radius-md)">
+              <div style="font-size:1.5rem;font-weight:700;font-family:var(--font-display)" id="attend-total">0</div>
+              <div class="text-muted text-small">Total Sessions</div>
+            </div>
+            <div style="text-align:center;padding:12px;background:var(--green-100);border-radius:var(--radius-md)">
+              <div style="font-size:1.5rem;font-weight:700;font-family:var(--font-display);color:var(--green-500)" id="attend-present">0</div>
+              <div class="text-muted text-small">Present</div>
+            </div>
+            <div style="text-align:center;padding:12px;background:var(--red-100);border-radius:var(--radius-md)">
+              <div style="font-size:1.5rem;font-weight:700;font-family:var(--font-display);color:var(--red-500)" id="attend-absent">0</div>
+              <div class="text-muted text-small">Absent</div>
+            </div>
+            <div style="text-align:center;padding:12px;background:var(--indigo-50);border-radius:var(--radius-md)">
+              <div style="font-size:1.5rem;font-weight:700;font-family:var(--font-display);color:var(--indigo-700)" id="attend-pct">0%</div>
+              <div class="text-muted text-small">Percentage</div>
+            </div>
+          </div>
+          <div style="height:8px;background:var(--slate-100);border-radius:4px;overflow:hidden">
+            <div id="attend-pct-bar" style="height:100%;width:0%;border-radius:4px;transition:width .6s ease;background:var(--green-500)"></div>
+          </div>
+        </div>
+
+        <!-- Subject Tables -->
+        <div id="attend-subjects"></div>
+      </div>
+
+      <!-- ════ CHAT ════ -->
+      <div class="student-section hidden page-enter" id="section-chat">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h2>💬 Messages</h2>
+            <p>Chat with your teachers. Ask questions, get clarifications.</p>
+          </div>
+        </div>
+
+        <div class="chat-layout">
+          <div class="chat-sidebar">
+            <div class="chat-sidebar-header">
+              <span style="font-weight:600;font-size:.9rem">Conversations</span>
+            </div>
+            <div class="chat-search">
+              <div class="input-group">
+                <span class="input-icon">🔍</span>
+                <input type="text" class="form-control" placeholder="Search…" style="padding-left:36px;font-size:.82rem" />
+              </div>
+            </div>
+            <div class="chat-list" id="chat-list"></div>
+          </div>
+
+          <div class="chat-main">
+            <div id="chat-placeholder" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--slate-400);gap:12px">
+              <div style="font-size:3.5rem">💬</div>
+              <div style="font-size:1rem;font-weight:500">Select a conversation</div>
+              <div style="font-size:.85rem">or message a new teacher</div>
+            </div>
+            <div id="chat-active" style="display:none;flex-direction:column;height:100%">
+              <div class="chat-header">
+                <div class="avatar" id="chat-other-avatar">T</div>
+                <div>
+                  <div style="font-weight:600;font-size:.9rem" id="chat-other-name">Teacher</div>
+                  <div style="font-size:.75rem;color:var(--slate-400)" id="chat-other-role">Department</div>
+                </div>
+              </div>
+              <div class="chat-messages" id="chat-messages"></div>
+              <div class="chat-input-area">
+                <textarea class="chat-input" id="chat-input" rows="1" placeholder="Type a message… (Enter to send)"></textarea>
+                <button class="btn btn-primary" id="send-msg-btn" style="border-radius:50%;width:42px;height:42px;padding:0;flex-shrink:0">➤</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- New Chat Modal -->
+<div class="modal-overlay" id="new-chat-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>💬 Message a Teacher</h3>
+      <button class="btn-close" data-close-modal="new-chat-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="text-muted mb-16" style="font-size:.85rem">Select a teacher to start a conversation:</p>
+      <div id="new-chat-list" style="max-height:360px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="/static/js/utils.js"></script>
+<script src="/static/js/student.js"></script>
+<script>
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' });
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const n = document.getElementById('profile-name')?.textContent;
+      const g = document.getElementById('profile-name-greeting');
+      if (n && g) g.textContent = n.split(' ')[0];
+    }, 100);
+  });
+</script>
+</body>
+</html>

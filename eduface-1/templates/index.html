@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduFace — Login</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/login.css" />
+</head>
+<body class="bg-pattern">
+
+<!-- ═══════════════════════════════════════════════════════════
+     LOGIN PAGE
+═══════════════════════════════════════════════════════════ -->
+<div class="login-page page-enter">
+
+  <!-- Branding -->
+  <div class="brand-header">
+    <div class="brand-logo">
+      <div class="brand-icon">🎓</div>
+      <span class="brand-name">Edu<span>Face</span></span>
+    </div>
+    <p class="brand-tagline">SMART ATTENDANCE · CONNECTED LEARNING</p>
+  </div>
+
+  <!-- Three Login Cards -->
+  <div class="login-cards">
+
+    <!-- ── Admin Card ────────────────────────────── -->
+    <div class="login-card card-admin">
+      <div class="login-card-header">
+        <div class="card-icon">🛡️</div>
+        <div class="card-role-title">Administrator</div>
+        <div class="card-role-sub">Full system access & management</div>
+      </div>
+      <div class="login-card-body">
+        <form id="admin-login-form" autocomplete="off">
+          <div id="admin-error" class="alert alert-error" style="display:none;font-size:.82rem;padding:10px 13px"></div>
+          <div class="form-group">
+            <label class="form-label">User ID</label>
+            <div class="input-group">
+              <span class="input-icon">🪪</span>
+              <input type="text" id="admin-uid" class="form-control" placeholder="admin@123" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-group">
+              <span class="input-icon">🔑</span>
+              <input type="password" id="admin-pwd" class="form-control" placeholder="••••••••" required />
+              <span class="input-icon-right" onclick="EduFace.togglePwd(this)">👁️</span>
+            </div>
+          </div>
+          <div style="text-align:right;margin-bottom:16px">
+            <span class="forgot-link open-forgot">Forgot credentials?</span>
+          </div>
+          <button type="submit" class="btn btn-amber btn-full btn-lg">Login as Admin ➔</button>
+        </form>
+      </div>
+      <div class="card-stripe"></div>
+    </div>
+
+    <!-- ── Teacher Card ──────────────────────────── -->
+    <div class="login-card card-teacher">
+      <div class="login-card-header">
+        <div class="card-icon">🧑‍🏫</div>
+        <div class="card-role-title">Teacher</div>
+        <div class="card-role-sub">Manage attendance & chat with students</div>
+      </div>
+      <div class="login-card-body">
+        <form id="teacher-login-form" autocomplete="off">
+          <div id="teacher-error" class="alert alert-error" style="display:none;font-size:.82rem;padding:10px 13px"></div>
+          <div class="form-group">
+            <label class="form-label">User ID</label>
+            <div class="input-group">
+              <span class="input-icon">🪪</span>
+              <input type="text" id="teacher-uid" class="form-control" placeholder="e.g. priya@edu" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-group">
+              <span class="input-icon">🔑</span>
+              <input type="password" id="teacher-pwd" class="form-control" placeholder="••••••••" required />
+              <span class="input-icon-right" onclick="EduFace.togglePwd(this)">👁️</span>
+            </div>
+          </div>
+          <div style="text-align:right;margin-bottom:16px">
+            <span class="forgot-link open-forgot">Forgot credentials?</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full btn-lg">Login as Teacher ➔</button>
+        </form>
+      </div>
+      <div class="login-card-footer">
+        <span>New teacher? </span>
+        <span class="register-link" data-open-modal="teacher-reg-modal">Register here →</span>
+      </div>
+      <div class="card-stripe"></div>
+    </div>
+
+    <!-- ── Student Card ──────────────────────────── -->
+    <div class="login-card card-student">
+      <div class="login-card-header">
+        <div class="card-icon">👩‍🎓</div>
+        <div class="card-role-title">Student</div>
+        <div class="card-role-sub">View attendance & chat with teachers</div>
+      </div>
+      <div class="login-card-body">
+        <form id="student-login-form" autocomplete="off">
+          <div id="student-error" class="alert alert-error" style="display:none;font-size:.82rem;padding:10px 13px"></div>
+          <div class="form-group">
+            <label class="form-label">User ID</label>
+            <div class="input-group">
+              <span class="input-icon">🪪</span>
+              <input type="text" id="student-uid" class="form-control" placeholder="e.g. arjun@student" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-group">
+              <span class="input-icon">🔑</span>
+              <input type="password" id="student-pwd" class="form-control" placeholder="••••••••" required />
+              <span class="input-icon-right" onclick="EduFace.togglePwd(this)">👁️</span>
+            </div>
+          </div>
+          <div style="text-align:right;margin-bottom:16px">
+            <span class="forgot-link open-forgot">Forgot credentials?</span>
+          </div>
+          <button type="submit" class="btn btn-success btn-full btn-lg" style="background:#0d9488">Login as Student ➔</button>
+        </form>
+      </div>
+      <div class="login-card-footer">
+        <span>New student? </span>
+        <span class="register-link" data-open-modal="student-reg-modal">Register here →</span>
+      </div>
+      <div class="card-stripe"></div>
+    </div>
+
+  </div><!-- /login-cards -->
+
+  <p class="text-center mt-24" style="color:rgba(255,255,255,.35);font-size:.78rem">
+    © 2025 EduFace · Smart Attendance with Face Recognition
+  </p>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     MODAL: Forgot Password / User ID
+════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="forgot-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h3>🔒 Account Recovery</h3>
+        <p class="text-muted" style="margin-top:4px;font-size:.85rem">Recover your User ID and Password</p>
+      </div>
+      <button class="btn-close" data-close-modal="forgot-modal">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Step 1: Choose method -->
+      <div id="forgot-step-1">
+        <div class="recovery-tabs" style="margin-bottom:18px">
+          <button class="recovery-tab active" data-tab="email">📧 Via Email</button>
+          <button class="recovery-tab" data-tab="mobile">📱 Via Mobile</button>
+        </div>
+        <div id="forgot-email-block">
+          <div class="form-group">
+            <label class="form-label">Registered Email Address</label>
+            <div class="input-group">
+              <span class="input-icon">📧</span>
+              <input type="email" id="forgot-email" class="form-control" placeholder="your@email.com" />
+            </div>
+          </div>
+        </div>
+        <div id="forgot-mobile-block" style="display:none">
+          <div class="form-group">
+            <label class="form-label">Registered Mobile Number</label>
+            <div class="input-group">
+              <span class="input-icon">📱</span>
+              <input type="tel" id="forgot-mobile" class="form-control" placeholder="10-digit mobile number" />
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" id="send-otp-btn">Send OTP 📨</button>
+        <p class="text-muted text-center mt-12" style="font-size:.78rem">
+          A 6-digit OTP will be sent to your registered contact. (Demo: check browser console)
+        </p>
+      </div>
+
+      <!-- Step 2: Enter OTP -->
+      <div id="forgot-step-2" style="display:none">
+        <div class="alert alert-info">Enter the 6-digit OTP sent to your registered contact.</div>
+        <div class="form-group">
+          <label class="form-label">OTP Code</label>
+          <input type="text" id="forgot-otp" class="form-control" placeholder="e.g. 482916" maxlength="6"
+                 style="font-size:1.4rem;letter-spacing:.3em;text-align:center;font-weight:700" />
+        </div>
+        <button class="btn btn-primary btn-full" id="verify-otp-btn">Verify OTP ✓</button>
+      </div>
+
+      <!-- Step 3: Credentials revealed -->
+      <div id="forgot-step-3" style="display:none">
+        <div class="alert alert-success">✅ Identity verified! Your credentials are below.</div>
+        <div style="background:var(--slate-50);border-radius:var(--radius-md);padding:20px;margin-top:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span class="text-muted">User ID</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <code id="recovered-userid" style="font-size:.95rem;background:var(--indigo-50);padding:3px 10px;border-radius:6px;color:var(--indigo-700);font-weight:600"></code>
+              <button class="btn btn-ghost btn-sm" onclick="EduFace.copyText(document.getElementById('recovered-userid').textContent)">📋</button>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span class="text-muted">Password</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <code id="recovered-hint" style="font-size:.95rem;background:var(--amber-100);padding:3px 10px;border-radius:6px;color:#92400e;font-weight:600"></code>
+              <button class="btn btn-ghost btn-sm" onclick="EduFace.copyText(document.getElementById('recovered-hint').textContent)">📋</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full mt-16" data-close-modal="forgot-modal">Close & Login →</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     MODAL: Teacher Registration (3-step)
+════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="teacher-reg-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <h3>🧑‍🏫 Teacher Registration</h3>
+        <p class="text-muted" style="font-size:.85rem;margin-top:4px">Your account will be reviewed by admin before activation</p>
+      </div>
+      <button class="btn-close" data-close-modal="teacher-reg-modal">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Step Indicators -->
+      <div class="reg-steps">
+        <div class="reg-step">
+          <div class="step-circle active" id="teacher-reg-step-circle-1">1</div>
+          <div class="step-label active" id="teacher-reg-step-label-1">Personal Info</div>
+        </div>
+        <div class="reg-step">
+          <div class="step-circle" id="teacher-reg-step-circle-2">2</div>
+          <div class="step-label" id="teacher-reg-step-label-2">Department</div>
+        </div>
+        <div class="reg-step">
+          <div class="step-circle" id="teacher-reg-step-circle-3">3</div>
+          <div class="step-label" id="teacher-reg-step-label-3">Account</div>
+        </div>
+      </div>
+
+      <form id="teacher-reg-form">
+
+        <!-- Step 1: Personal Info -->
+        <div class="reg-step-content active" id="teacher-reg-step-content-1">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Full Name *</label>
+              <div class="input-group">
+                <span class="input-icon">👤</span>
+                <input type="text" id="treg-name" class="form-control" placeholder="Dr. / Mr. / Ms. Full Name" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mobile Number *</label>
+              <div class="input-group">
+                <span class="input-icon">📱</span>
+                <input type="tel" id="treg-mobile" class="form-control" placeholder="10-digit number" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address *</label>
+              <div class="input-group">
+                <span class="input-icon">📧</span>
+                <input type="email" id="treg-email" class="form-control" placeholder="your@email.com" required />
+              </div>
+            </div>
+          </div>
+          <div class="step-nav">
+            <span></span>
+            <button type="button" class="btn btn-primary" data-next>Next: Department →</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Department + Photo -->
+        <div class="reg-step-content" id="teacher-reg-step-content-2">
+          <div class="form-group">
+            <label class="form-label">Department / Class *</label>
+            <select id="treg-dept" class="form-control" required>
+              <option value="">— Select Department —</option>
+              <option>Computer Science</option>
+              <option>Mathematics</option>
+              <option>Physics</option>
+              <option>Chemistry</option>
+              <option>Biology</option>
+              <option>English</option>
+              <option>History</option>
+              <option>Economics</option>
+              <option>Commerce</option>
+              <option>Arts</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Candidate Photo (Clear Face Photo) *</label>
+            <div class="file-upload-area">
+              <input type="file" id="treg-photo" accept="image/*" />
+              <div class="upload-icon">📷</div>
+              <strong>Click or drag to upload</strong>
+              <p>JPG, PNG, WEBP · Max 5MB · Must clearly show your face</p>
+              <img id="treg-photo-preview" src="" alt="" style="display:none;max-width:120px;max-height:120px;border-radius:8px;margin-top:10px;border:2px solid var(--indigo-200)" />
+            </div>
+          </div>
+          <div class="step-nav">
+            <button type="button" class="btn btn-outline" data-prev>← Back</button>
+            <button type="button" class="btn btn-primary" data-next>Next: Account →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Account Credentials -->
+        <div class="reg-step-content" id="teacher-reg-step-content-3">
+          <div class="form-group">
+            <label class="form-label">User ID (for login) *</label>
+            <div class="input-group">
+              <span class="input-icon">🪪</span>
+              <input type="text" id="treg-userid" class="form-control" placeholder="e.g. priya@edu" required />
+            </div>
+            <p class="form-hint">This will be your login username. Choose something unique.</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <div class="input-group">
+              <span class="input-icon">🔑</span>
+              <input type="password" id="treg-password" class="form-control" placeholder="Min 8 chars, include @, 0-9" required />
+              <span class="input-icon-right" onclick="EduFace.togglePwd(this)">👁️</span>
+            </div>
+            <p class="form-hint">Must contain uppercase, number and special character.</p>
+          </div>
+          <div class="alert alert-info" style="font-size:.82rem">
+            📋 After submitting, your details will be sent to the admin for approval. You'll be notified once activated.
+          </div>
+          <div class="step-nav">
+            <button type="button" class="btn btn-outline" data-prev>← Back</button>
+            <button type="submit" class="btn btn-primary">Submit for Approval 🚀</button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     MODAL: Student Registration (3-step)
+════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="student-reg-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <h3>👩‍🎓 Student Registration</h3>
+        <p class="text-muted" style="font-size:.85rem;margin-top:4px">Your face photo is used for automatic attendance</p>
+      </div>
+      <button class="btn-close" data-close-modal="student-reg-modal">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="reg-steps">
+        <div class="reg-step">
+          <div class="step-circle active" id="student-reg-step-circle-1">1</div>
+          <div class="step-label active" id="student-reg-step-label-1">Personal Info</div>
+        </div>
+        <div class="reg-step">
+          <div class="step-circle" id="student-reg-step-circle-2">2</div>
+          <div class="step-label" id="student-reg-step-label-2">Class & Photo</div>
+        </div>
+        <div class="reg-step">
+          <div class="step-circle" id="student-reg-step-circle-3">3</div>
+          <div class="step-label" id="student-reg-step-label-3">Account</div>
+        </div>
+      </div>
+
+      <form id="student-reg-form">
+
+        <!-- Step 1 -->
+        <div class="reg-step-content active" id="student-reg-step-content-1">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="form-group" style="grid-column:1/-1">
+              <label class="form-label">Full Name *</label>
+              <div class="input-group">
+                <span class="input-icon">👤</span>
+                <input type="text" id="sreg-name" class="form-control" placeholder="Your full name" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mobile Number *</label>
+              <div class="input-group">
+                <span class="input-icon">📱</span>
+                <input type="tel" id="sreg-mobile" class="form-control" placeholder="10-digit number" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address *</label>
+              <div class="input-group">
+                <span class="input-icon">📧</span>
+                <input type="email" id="sreg-email" class="form-control" placeholder="your@email.com" required />
+              </div>
+            </div>
+          </div>
+          <div class="step-nav">
+            <span></span>
+            <button type="button" class="btn btn-primary" data-next>Next: Class & Photo →</button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="reg-step-content" id="student-reg-step-content-2">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="form-group">
+              <label class="form-label">Department</label>
+              <select id="sreg-dept" class="form-control" required>
+                <option value="">— Select Department —</option>
+                <option>Computer Science</option>
+                <option>Mathematics</option>
+                <option>Physics</option>
+                <option>Chemistry</option>
+                <option>Biology</option>
+                <option>English</option>
+                <option>History</option>
+                <option>Economics</option>
+                <option>Commerce</option>
+                <option>Arts</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Roll Number</label>
+              <div class="input-group">
+                <span class="input-icon">🎓</span>
+                <input type="text" id="sreg-rollno" class="form-control" placeholder="e.g. CS2301" />
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Candidate Photo (Clear Face Photo) *</label>
+            <div class="file-upload-area">
+              <input type="file" id="sreg-photo" accept="image/*" />
+              <div class="upload-icon">📷</div>
+              <strong>Click or drag to upload</strong>
+              <p>JPG, PNG, WEBP · Max 5MB · Must clearly show your face (used for attendance)</p>
+              <img id="sreg-photo-preview" src="" alt="" style="display:none;max-width:120px;max-height:120px;border-radius:8px;margin-top:10px;border:2px solid var(--indigo-200)" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Face Enrollment for ML Training (Recommended ✨)</label>
+            <div style="background:var(--indigo-50);border:1px solid var(--indigo-200);border-radius:var(--radius-md);padding:16px;text-align:center">
+              <div style="font-size:32px;margin-bottom:8px">🎥</div>
+              <strong style="display:block;margin-bottom:4px">Capture 20 Face Photos</strong>
+              <p style="font-size:.85rem;color:var(--slate-600);margin:0 0 12px 0">
+                Your face will be automatically photographed 20 times. This helps our AI model recognize you during attendance.
+              </p>
+              <button type="button" class="btn btn-primary" onclick="faceEnrollment.openModal()">
+                📸 Start Camera Capture
+              </button>
+              <div id="sreg-face-capture-status" style="
+                margin-top: 12px;
+                font-size: .85rem;
+                color: var(--slate-600);
+                display: none;
+              ">
+                <span style="color: var(--green-600); font-weight: 500;">✓</span>
+                <span id="sreg-face-count">0</span> face photos captured
+              </div>
+            </div>
+          </div>
+          
+          <div class="step-nav">
+            <button type="button" class="btn btn-outline" data-prev>← Back</button>
+            <button type="button" class="btn btn-primary" data-next>Next: Account →</button>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="reg-step-content" id="student-reg-step-content-3">
+          <div class="form-group">
+            <label class="form-label">User ID (for login) *</label>
+            <div class="input-group">
+              <span class="input-icon">🪪</span>
+              <input type="text" id="sreg-userid" class="form-control" placeholder="e.g. arjun@student" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <div class="input-group">
+              <span class="input-icon">🔑</span>
+              <input type="password" id="sreg-password" class="form-control" placeholder="Min 8 chars" required />
+              <span class="input-icon-right" onclick="EduFace.togglePwd(this)">👁️</span>
+            </div>
+          </div>
+          <div class="alert alert-info" style="font-size:.82rem">
+            📋 After submitting, your details will be sent to the admin for approval. You'll be notified once activated.
+          </div>
+          <div class="step-nav">
+            <button type="button" class="btn btn-outline" data-prev>← Back</button>
+            <button type="submit" class="btn btn-success" style="background:#0d9488">Submit for Approval 🚀</button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     MODAL: Pending Approval Notice
+════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="pending-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-body" style="text-align:center;padding:40px 32px">
+      <div style="font-size:3.5rem;margin-bottom:16px">⏳</div>
+      <h3 style="font-family:var(--font-display);margin-bottom:12px">Registration Submitted!</h3>
+      <p class="text-muted" style="margin-bottom:24px">
+        Your account request has been sent to the administrator for review.
+        You will be able to login once the admin approves your account.
+      </p>
+      <div class="alert alert-warning" style="text-align:left;font-size:.83rem">
+        <strong>What happens next?</strong><br>
+        Admin reviews your details and photo, then approves or rejects within 24 hours.
+      </div>
+      <button class="btn btn-primary btn-full mt-16" data-close-modal="pending-modal">OK, Got it! ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<script src="/static/js/utils.js"></script>
+<script src="/static/js/login.js"></script>
+<script src="/static/js/student_face_enrollment.js"></script>
+</body>
+</html>

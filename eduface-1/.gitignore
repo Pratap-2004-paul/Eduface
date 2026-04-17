@@ -1,0 +1,25 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+
+# Database
+*.db
+
+# Dataset
+dataset/
+
+# Uploads (user images/files)
+uploads/
+
+# Runtime files
+train_status.json
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,25 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+
+# Database
+*.db
+
+# ML models
+*.pkl
+
+# Dataset
+dataset/
+
+# Runtime files
+train_status.json
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

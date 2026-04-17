@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduFace — Admin Dashboard</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/dashboard.css" />
+</head>
+<body style="background:var(--slate-50)">
+
+<div class="dashboard-layout">
+
+  <!-- ═══ SIDEBAR ══════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">🎓</div>
+      <div class="sidebar-brand-text">Edu<span>Face</span></div>
+    </div>
+
+    <div class="sidebar-profile">
+      <div class="sidebar-avatar-wrap">
+        <div class="sidebar-avatar">🛡️</div>
+        <div class="sidebar-status-dot"></div>
+      </div>
+      <div>
+        <div class="sidebar-user-name">Administrator</div>
+        <div class="sidebar-user-role">Super Admin</div>
+        <div class="sidebar-user-id">admin@123</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item" data-section="overview">
+        <span class="nav-icon">🏠</span> Dashboard
+      </div>
+      <div class="nav-item" data-section="approvals">
+        <span class="nav-icon">⏳</span> Pending Approvals
+        <span class="nav-badge" id="approval-badge">0</span>
+      </div>
+
+      <div class="nav-section-label">People</div>
+      <div class="nav-item" data-section="teachers">
+        <span class="nav-icon">🧑‍🏫</span> Teachers
+      </div>
+      <div class="nav-item" data-section="students">
+        <span class="nav-icon">👩‍🎓</span> Students
+      </div>
+
+      <div class="nav-section-label">Records</div>
+      <div class="nav-item" data-section="attendance">
+        <span class="nav-icon">📋</span> Attendance
+      </div>
+      <div class="nav-item" data-section="chats">
+        <span class="nav-icon">💬</span> All Chats
+      </div>
+
+      <div class="nav-section-label">System</div>
+      <div class="nav-item" data-section="facial-recognition">
+        <span class="nav-icon">🧠</span> Facial Recognition
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="nav-item" id="logout-btn">
+        <span class="nav-icon">🚪</span> Logout
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ════════════════════════════════════ -->
+  <div class="main-content">
+
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="topbar-title" id="topbar-title">Admin Overview</div>
+          <div class="topbar-subtitle">EduFace Administration Panel</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div style="font-size:.82rem;color:var(--slate-400)">
+          📅 <span id="today-date"></span>
+        </div>
+        <button class="topbar-icon-btn" title="Notifications">
+          🔔<span class="notif-dot"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="page-content">
+
+      <!-- ══════════ SECTION: OVERVIEW ══════════ -->
+      <div class="admin-section page-enter" id="section-overview">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h2>Welcome back, Administrator 👋</h2>
+            <p>Here's a complete overview of your EduFace platform.</p>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-blue">🧑‍🏫</div>
+            <div>
+              <div class="stat-value" id="stat-teachers">0</div>
+              <div class="stat-label">Active Teachers</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-green">👩‍🎓</div>
+            <div>
+              <div class="stat-value" id="stat-students">0</div>
+              <div class="stat-label">Active Students</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-indigo">📋</div>
+            <div>
+              <div class="stat-value" id="stat-attendance">0</div>
+              <div class="stat-label">Attendance Records</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-amber">💬</div>
+            <div>
+              <div class="stat-value" id="stat-chats">0</div>
+              <div class="stat-label">Total Messages</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:var(--red-100)">⏳</div>
+            <div>
+              <div class="stat-value" id="stat-pending">0</div>
+              <div class="stat-label">Pending Approvals</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Quick Navigation</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="stat-card" style="cursor:pointer" onclick="document.querySelector('[data-section=teachers]').click()">
+                <div class="stat-icon stat-icon-blue">🧑‍🏫</div>
+                <div><div style="font-weight:600">Manage Teachers</div><div class="text-muted text-small">View, approve, reject</div></div>
+              </div>
+              <div class="stat-card" style="cursor:pointer" onclick="document.querySelector('[data-section=students]').click()">
+                <div class="stat-icon stat-icon-green">👩‍🎓</div>
+                <div><div style="font-weight:600">Manage Students</div><div class="text-muted text-small">View all students</div></div>
+              </div>
+              <div class="stat-card" style="cursor:pointer" onclick="document.querySelector('[data-section=attendance]').click()">
+                <div class="stat-icon stat-icon-indigo">📋</div>
+                <div><div style="font-weight:600">Attendance Logs</div><div class="text-muted text-small">All session records</div></div>
+              </div>
+              <div class="stat-card" style="cursor:pointer" onclick="document.querySelector('[data-section=chats]').click()">
+                <div class="stat-icon stat-icon-amber">💬</div>
+                <div><div style="font-weight:600">Chat Monitor</div><div class="text-muted text-small">All conversations</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">🛡️ Admin Credentials</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="background:var(--slate-50);border-radius:8px;padding:12px;display:flex;justify-content:space-between;font-size:.87rem">
+                <span class="text-muted">User ID</span>
+                <code style="color:var(--indigo-700);font-weight:600">admin@123</code>
+              </div>
+              <div style="background:var(--slate-50);border-radius:8px;padding:12px;display:flex;justify-content:space-between;font-size:.87rem">
+                <span class="text-muted">Password</span>
+                <code style="color:var(--amber-500);font-weight:600">Admin@123</code>
+              </div>
+            </div>
+            <div class="alert alert-warning mt-16" style="font-size:.8rem">
+              ⚠️ Keep admin credentials strictly confidential.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ SECTION: APPROVALS ══════════ -->
+      <div class="admin-section hidden" id="section-approvals">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h2>⏳ Pending Approvals</h2>
+            <p>Review and approve new teacher/student registrations.</p>
+          </div>
+        </div>
+        <div id="approvals-container"></div>
+      </div>
+
+      <!-- ══════════ SECTION: TEACHERS ══════════ -->
+      <div class="admin-section hidden" id="section-teachers">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h2>🧑‍🏫 Teacher Management</h2>
+            <p>View all registered teachers, their credentials and details.</p>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">All Teachers</div>
+            <div class="input-group" style="width:260px">
+              <span class="input-icon">🔍</span>
+              <input type="text" id="teachers-search" class="form-control" placeholder="Search name, dept, user ID…" style="padding-left:38px" />
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Teacher</th>
+                  <th>User ID</th>
+                  <th>Password</th>
+                  <th>Department</th>
+                  <th>Mobile</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="teachers-tbody">
+                <tr><td colspan="8" class="text-center text-muted" style="padding:32px">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ SECTION: STUDENTS ══════════ -->
+      <div class="admin-section hidden" id="section-students">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h2>👩‍🎓 Student Management</h2>
+            <p>View all registered students, their credentials and attendance status.</p>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">All Students</div>
+            <div class="input-group" style="width:260px">
+              <span class="input-icon">🔍</span>
+              <input type="text" id="students-search" class="form-control" placeholder="Search name, dept, user ID…" style="padding-left:38px" />
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>User ID</th>
+                  <th>Password</th>
+                  <th>Department</th>
+                  <th>Roll No.</th>
+                  <th>Mobile</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="students-tbody">
+                <tr><td colspan="8" class="text-center text-muted" style="padding:32px">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ SECTION: ATTENDANCE ══════════ -->
+      <div class="admin-section hidden" id="section-attendance">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h2>📋 Attendance Records</h2>
+            <p>All attendance sessions logged by teachers via face recognition.</p>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">All Attendance Logs</div>
+            <div class="input-group" style="width:260px">
+              <span class="input-icon">🔍</span>
+              <input type="text" id="attendance-search" class="form-control" placeholder="Subject, department…" style="padding-left:38px" />
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Subject</th>
+                  <th>Department</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="attendance-tbody">
+                <tr><td colspan="5" class="text-center text-muted" style="padding:32px">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════ SECTION: CHATS ══════════ -->
+      <div class="admin-section hidden" id="section-chats">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h2>💬 All Conversations</h2>
+            <p>Monitor all chats between teachers and students.</p>
+          </div>
+        </div>
+        <div id="chats-admin-container"></div>
+      </div>
+
+      <!-- ══════════ SECTION: FACIAL RECOGNITION ══════════ -->
+      <div class="admin-section hidden" id="section-facial-recognition">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h2>🧠 Facial Recognition Status</h2>
+            <p>Monitor ML model training progress and face enrollment statistics.</p>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <!-- System Status Stats -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+            <div class="stat-card">
+              <div class="stat-icon stat-icon-green">👩‍🎓</div>
+              <div>
+                <div class="stat-value" id="fr-total-students">0</div>
+                <div class="stat-label">Total Students</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon stat-icon-blue">✓</div>
+              <div>
+                <div class="stat-value" id="fr-face-enrolled">0</div>
+                <div class="stat-label">Face Enrolled</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon stat-icon-indigo">🖼️</div>
+              <div>
+                <div class="stat-value" id="fr-face-images">0</div>
+                <div class="stat-label">Face Images Collected</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon" style="background:var(--amber-100)">🤖</div>
+              <div>
+                <div class="stat-value" id="fr-model-status">❌ Not Trained</div>
+                <div class="stat-label">Model Status</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon stat-icon-green">✓</div>
+              <div>
+                <div class="stat-value" id="fr-face-recognized">0</div>
+                <div class="stat-label">Successful Recognitions</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Training Status Panel -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">📊 ML Model Training Status</div>
+            </div>
+            <div style="padding:20px">
+              <div id="fr-training-status" style="text-align:center;padding:20px;background:var(--slate-50);border-radius:var(--radius-md)">
+                <div style="font-size:3rem;margin-bottom:12px">⏳</div>
+                <div style="font-size:.95rem;color:var(--slate-600)">Loading training status...</div>
+              </div>
+              <div id="fr-training-details" style="margin-top:16px"></div>
+            </div>
+          </div>
+
+          <!-- Face Enrollment per Student -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">📋 Face Enrollment Details</div>
+              <input type="text" id="fr-search" class="form-control" placeholder="Search student…" style="width:200px;font-size:.85rem" />
+            </div>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Student ID</th>
+                    <th>Face Photos</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="fr-enrollment-tbody">
+                  <tr><td colspan="3" class="text-center text-muted" style="padding:32px">Loading…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main-content -->
+</div><!-- /dashboard-layout -->
+
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>User Details</h3>
+      <button class="btn-close" data-close-modal="detail-modal">✕</button>
+    </div>
+    <div class="modal-body" id="detail-modal-body"></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- ════ EDIT RECORD MODAL ════ -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <h3 id="edit-modal-title">✏️ Edit Record</h3>
+        <p class="text-muted" style="margin-top:4px;font-size:.85rem">Update details and click Save Changes.</p>
+      </div>
+      <button class="btn-close" onclick="EduFace.closeModal('edit-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="edit-modal-body">
+      <!-- Dynamically filled by openEditModal() in admin.js -->
+    </div>
+  </div>
+</div>
+
+<!-- ════ DELETE CONFIRMATION MODAL ════ -->
+<div class="modal-overlay" id="delete-confirm-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div>
+        <h3 id="del-confirm-title" style="color:var(--red-500)">🗑️ Delete Record</h3>
+        <p class="text-muted" style="margin-top:4px;font-size:.85rem">This action cannot be undone.</p>
+      </div>
+      <button class="btn-close" onclick="EduFace.closeModal('delete-confirm-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--red-100);border-radius:var(--radius-md);padding:18px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+          <span style="font-size:2rem">⚠️</span>
+          <div>
+            <div style="font-weight:600;color:var(--red-500);font-size:.95rem">Confirm <span id="del-confirm-type">Deletion</span></div>
+            <div style="font-size:.84rem;color:#b91c1c;margin-top:2px">
+              Are you sure you want to permanently delete <strong id="del-confirm-name"></strong>?
+            </div>
+          </div>
+        </div>
+        <div style="font-size:.8rem;color:#b91c1c;padding:8px 12px;background:rgba(239,68,68,.12);border-radius:6px">
+          ⚡ <span id="del-confirm-warning"></span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-outline btn-sm" onclick="EduFace.closeModal('delete-confirm-modal')">Cancel</button>
+        <button class="btn btn-danger" id="del-confirm-btn" style="min-width:130px">🗑 Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="/static/js/utils.js"></script>
+<script src="/static/js/admin.js"></script>
+<script>
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+</script>
+</body>
+</html>

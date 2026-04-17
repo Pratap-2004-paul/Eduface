@@ -1,0 +1,328 @@
+<!-- Teacher dashboard -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduFace — Teacher Dashboard</title>
+  <link rel="stylesheet" href="/static/css/main.css" />
+  <link rel="stylesheet" href="/static/css/dashboard.css" />
+</head>
+<body style="background:var(--slate-50)">
+
+<div class="dashboard-layout">
+
+  <!-- ═══ SIDEBAR ══════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">🎓</div>
+      <div class="sidebar-brand-text">Edu<span>Face</span></div>
+    </div>
+
+    <div class="sidebar-profile">
+      <div class="sidebar-avatar-wrap">
+        <div class="sidebar-avatar" id="sb-avatar">T</div>
+        <div class="sidebar-status-dot"></div>
+      </div>
+      <div>
+        <div class="sidebar-user-name" id="sb-name">Teacher</div>
+        <div class="sidebar-user-role" id="sb-dept">Department</div>
+        <div class="sidebar-user-id"  id="sb-uid">—</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Navigation</div>
+      <div class="nav-item active" data-section="home">
+        <span class="nav-icon">🏠</span> Home
+      </div>
+      <div class="nav-item" data-section="attendance">
+        <span class="nav-icon">📋</span> Mark Attendance
+      </div>
+      <div class="nav-item" data-section="chat">
+        <span class="nav-icon">💬</span> Messages
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="nav-item" id="logout-btn">
+        <span class="nav-icon">🚪</span> Logout
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ════════════════════════════════════ -->
+  <div class="main-content">
+
+    <div class="topbar">
+      <div class="topbar-left">
+        <div>
+          <div class="topbar-title" id="topbar-title">Dashboard</div>
+          <div class="topbar-subtitle">Teacher Portal · EduFace</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div style="font-size:.82rem;color:var(--slate-400)" id="today-date"></div>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- ════ HOME ════ -->
+      <div class="teacher-section page-enter" id="section-home">
+        <div class="profile-dashboard">
+
+          <!-- Left: Profile Card -->
+          <div class="profile-card">
+            <div class="profile-card-header">
+              <div class="profile-photo-wrap">
+                <div class="profile-photo" id="profile-initials">T</div>
+                <img id="profile-photo" src="" alt="" style="display:none;width:100px;height:100px;border-radius:50%;object-fit:cover;border:4px solid rgba(255,255,255,.25);position:absolute;top:0;left:0" />
+              </div>
+              <div class="profile-name" id="profile-name">Teacher Name</div>
+              <div class="profile-role-badge">Teacher</div>
+            </div>
+            <div class="profile-card-body">
+              <div class="profile-field">
+                <span class="profile-field-icon">🏫</span>
+                <div>
+                  <div class="profile-field-label">Department</div>
+                  <div class="profile-field-value" id="pf-dept">—</div>
+                </div>
+              </div>
+              <div class="profile-field">
+                <span class="profile-field-icon">📧</span>
+                <div>
+                  <div class="profile-field-label">Email</div>
+                  <div class="profile-field-value" id="pf-email">—</div>
+                </div>
+              </div>
+              <div class="profile-field">
+                <span class="profile-field-icon">📱</span>
+                <div>
+                  <div class="profile-field-label">Mobile</div>
+                  <div class="profile-field-value" id="pf-mobile">—</div>
+                </div>
+              </div>
+              <div class="profile-field">
+                <span class="profile-field-icon">🪪</span>
+                <div>
+                  <div class="profile-field-label">User ID</div>
+                  <div class="profile-field-value" id="pf-userid">—</div>
+                </div>
+              </div>
+              <div class="profile-field">
+                <span class="profile-field-icon">📅</span>
+                <div>
+                  <div class="profile-field-label">Joined</div>
+                  <div class="profile-field-value" id="pf-joined">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Action Cards -->
+          <div>
+            <h2 style="margin-bottom:8px">Welcome back, <span id="profile-name-greeting" style="color:var(--indigo-700)">Teacher</span>! 👋</h2>
+            <p class="text-muted mb-24">What would you like to do today?</p>
+
+            <div class="quick-actions">
+              <div class="action-card" id="action-attendance">
+                <div class="action-icon action-icon-attend">📋</div>
+                <div class="action-title">Mark Attendance</div>
+                <div class="action-desc">Use face recognition (photo or live camera) to automatically mark student attendance for your class.</div>
+                <button class="btn btn-primary btn-full mt-12">Open Attendance →</button>
+              </div>
+              <div class="action-card" id="action-chat">
+                <div class="action-icon action-icon-chat">💬</div>
+                <div class="action-title">Open Chat</div>
+                <div class="action-desc">View all your conversations or start a new chat with any of your students.</div>
+                <button class="btn btn-outline btn-full mt-12">Open Messages →</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ════ ATTENDANCE ════ -->
+      <div class="teacher-section hidden page-enter" id="section-attendance">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h2>📋 Mark Attendance</h2>
+            <p>Capture a class photo or use live camera for automatic face-recognition attendance.</p>
+          </div>
+        </div>
+
+        <div class="attend-form-card">
+          <form id="attend-form">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px">
+              <div class="form-group" style="margin:0">
+                <label class="form-label">Date *</label>
+                <input type="date" id="attend-date" class="form-control" required />
+              </div>
+              <div class="form-group" style="margin:0">
+                <label class="form-label">Time</label>
+                <input type="text" id="attend-time" class="form-control" placeholder="HH:MM" />
+              </div>
+              <div class="form-group" style="margin:0">
+                <label class="form-label">Department *</label>
+                <select id="attend-dept" class="form-control" required>
+                  <option value="">— Select —</option>
+                  <option>Computer Science</option>
+                  <option>Mathematics</option>
+                  <option>Physics</option>
+                  <option>Chemistry</option>
+                  <option>Biology</option>
+                  <option>English</option>
+                  <option>History</option>
+                  <option>Economics</option>
+                  <option>Commerce</option>
+                  <option>Arts</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0">
+                <label class="form-label">Subject *</label>
+                <input type="text" id="attend-subject" class="form-control" placeholder="e.g. Data Structures" required />
+              </div>
+            </div>
+
+            <!-- Camera Section -->
+            <label class="form-label">Photo / Video CAPTCHA (Face Recognition) *</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:8px">
+
+              <!-- Live Camera -->
+              <div>
+                <div style="font-size:.8rem;color:var(--slate-500);margin-bottom:8px;font-weight:500">📹 Live Camera</div>
+                <div class="camera-area" id="camera-area">
+                  <div class="camera-placeholder" id="camera-placeholder">
+                    <div style="font-size:3rem">📷</div>
+                    <div class="camera-text">Live Camera Feed</div>
+                  </div>
+                  <video id="camera-video" autoplay muted style="display:none;width:100%;height:200px;object-fit:cover;border-radius:var(--radius-md)"></video>
+                  <canvas id="capture-canvas" style="display:none;width:100%;height:200px;object-fit:cover;border-radius:var(--radius-md)"></canvas>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:10px">
+                  <button type="button" class="btn btn-outline btn-sm" id="start-camera-btn">📹 Start Camera</button>
+                  <button type="button" class="btn btn-primary btn-sm" id="capture-btn" style="display:none">📸 Capture</button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="retake-btn" style="display:none">🔄 Retake</button>
+                </div>
+              </div>
+
+              <!-- Upload Photo -->
+              <div>
+                <div style="font-size:.8rem;color:var(--slate-500);margin-bottom:8px;font-weight:500">📁 Upload Class Photo</div>
+                <div class="camera-area" style="cursor:pointer" onclick="document.getElementById('photo-upload-input').click()">
+                  <img id="uploaded-preview" src="" alt="" style="display:none;width:100%;height:200px;object-fit:cover;border-radius:var(--radius-md)" />
+                  <div id="upload-placeholder">
+                    <div style="font-size:3rem">📁</div>
+                    <div class="camera-text">Click to upload class photo</div>
+                  </div>
+                </div>
+                <input type="file" id="photo-upload-input" accept="image/*,video/*" style="display:none" />
+                <p class="form-hint mt-8">JPG, PNG or MP4 · System will detect faces automatically</p>
+              </div>
+            </div>
+
+            <div style="margin-top:20px;padding:14px;background:var(--indigo-50);border-radius:var(--radius-md);font-size:.83rem;color:var(--indigo-700)">
+              🤖 <strong>AI Face Recognition:</strong> The system will compare detected faces with registered student photos and mark attendance automatically.
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg mt-20" id="mark-attend-btn" disabled>
+              🎯 Mark Attendance Now
+            </button>
+          </form>
+        </div>
+
+        <!-- Result Area -->
+        <div id="attendance-result-area" class="panel" style="display:none"></div>
+      </div>
+
+      <!-- ════ CHAT ════ -->
+      <div class="teacher-section hidden page-enter" id="section-chat">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h2>💬 Messages</h2>
+            <p>Chat with your students. All conversations are saved and monitored.</p>
+          </div>
+        </div>
+
+        <div class="chat-layout">
+          <!-- Chat List -->
+          <div class="chat-sidebar">
+            <div class="chat-sidebar-header">
+              <span style="font-weight:600;font-size:.9rem">Conversations</span>
+            </div>
+            <div class="chat-search">
+              <div class="input-group">
+                <span class="input-icon">🔍</span>
+                <input type="text" class="form-control" placeholder="Search…" style="padding-left:36px;font-size:.82rem" />
+              </div>
+            </div>
+            <div class="chat-list" id="chat-list">
+              <!-- JS rendered -->
+            </div>
+          </div>
+
+          <!-- Chat Main -->
+          <div class="chat-main">
+            <!-- Placeholder -->
+            <div id="chat-placeholder" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--slate-400);gap:12px">
+              <div style="font-size:3.5rem">💬</div>
+              <div style="font-size:1rem;font-weight:500">Select a conversation</div>
+              <div style="font-size:.85rem">or start a new chat with a student</div>
+            </div>
+            <!-- Active Chat -->
+            <div id="chat-active" style="display:none;flex-direction:column;height:100%">
+              <div class="chat-header">
+                <div class="avatar" id="chat-other-avatar">S</div>
+                <div>
+                  <div style="font-weight:600;font-size:.9rem" id="chat-other-name">Student</div>
+                  <div style="font-size:.75rem;color:var(--slate-400)" id="chat-other-role">Department</div>
+                </div>
+              </div>
+              <div class="chat-messages" id="chat-messages"></div>
+              <div class="chat-input-area">
+                <textarea class="chat-input" id="chat-input" rows="1" placeholder="Type a message… (Enter to send)"></textarea>
+                <button class="btn btn-primary" id="send-msg-btn" style="border-radius:50%;width:42px;height:42px;padding:0;flex-shrink:0">➤</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- New Chat Modal -->
+<div class="modal-overlay" id="new-chat-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>💬 New Conversation</h3>
+      <button class="btn-close" data-close-modal="new-chat-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="text-muted mb-16" style="font-size:.85rem">Select a student to start chatting:</p>
+      <div id="new-chat-list" style="max-height:360px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="/static/js/utils.js"></script>
+<script src="/static/js/teacher.js"></script>
+<script>
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' });
+  // Sync greeting name
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const n = document.getElementById('profile-name')?.textContent;
+      if (n && document.getElementById('profile-name-greeting')) {
+        document.getElementById('profile-name-greeting').textContent = n.split(' ')[0];
+      }
+    }, 100);
+  });
+</script>
+</body>
+</html>
