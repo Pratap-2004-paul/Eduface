@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit User</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span>🔐</span><span>Admin Panel</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/admin/dashboard"    class="nav-item">📊 Dashboard</a>
+      <a href="/admin/pending"      class="nav-item">⏳ Pending</a>
+      <a href="/admin/users"        class="nav-item active">👥 All Users</a>
+      <a href="/admin/departments"  class="nav-item">🏛 Departments</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">{{ admin.full_name[0] }}</div>
+        <div>
+          <div class="sidebar-name">{{ admin.full_name }}</div>
+          <div class="sidebar-role">Administrator</div>
+        </div>
+      </div>
+      <a href="/logout" class="btn-logout">Logout</a>
+    </div>
+  </aside>
+
+  <main class="panel-main">
+    <div class="panel-header">
+      <h1>✏️ Edit User</h1>
+      <a href="/admin/users" class="btn-link">← Back to Users</a>
+    </div>
+
+    {% if error %}
+    <div class="alert-panel error">⚠️ {{ error }}</div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert-panel success">✅ {{ success }}</div>
+    {% endif %}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;
+                gap:20px;align-items:start;">
+
+      <!-- Edit form -->
+      <div class="panel-card">
+        <div class="card-header">
+          <h2>Edit Details</h2>
+          <span class="role-badge role-{{ user.role }}">
+            {{ user.role|capitalize }}
+          </span>
+        </div>
+
+        <form method="POST"
+              action="/admin/edit/{{ user.id }}">
+
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:.72rem;
+                          color:#555;text-transform:uppercase;
+                          letter-spacing:.8px;margin-bottom:7px;">
+              Full Name
+            </label>
+            <input
+              type="text"
+              name="full_name"
+              value="{{ user.full_name }}"
+              required
+              style="width:100%;background:#0f0f1a;
+                     border:1px solid #2a2a4a;border-radius:7px;
+                     color:#e0e0e0;padding:10px 14px;
+                     font-size:.9rem;outline:none;"
+            />
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:.72rem;
+                          color:#555;text-transform:uppercase;
+                          letter-spacing:.8px;margin-bottom:7px;">
+              Email Address
+            </label>
+            <input
+              type="email"
+              name="email"
+              value="{{ user.email }}"
+              required
+              style="width:100%;background:#0f0f1a;
+                     border:1px solid #2a2a4a;border-radius:7px;
+                     color:#e0e0e0;padding:10px 14px;
+                     font-size:.9rem;outline:none;"
+            />
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:.72rem;
+                          color:#555;text-transform:uppercase;
+                          letter-spacing:.8px;margin-bottom:7px;">
+              Department
+            </label>
+            <select
+              name="department_id"
+              required
+              style="width:100%;background:#0f0f1a;
+                     border:1px solid #2a2a4a;border-radius:7px;
+                     color:#e0e0e0;padding:10px 14px;
+                     font-size:.9rem;outline:none;">
+              {% for d in departments %}
+              <option
+                value="{{ d.id }}"
+                {% if d.id == user.dept_id %}selected{% endif %}>
+                {{ d.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <label style="display:block;font-size:.72rem;
+                          color:#555;text-transform:uppercase;
+                          letter-spacing:.8px;margin-bottom:7px;">
+              Account Status
+            </label>
+            <select
+              name="status"
+              required
+              style="width:100%;background:#0f0f1a;
+                     border:1px solid #2a2a4a;border-radius:7px;
+                     color:#e0e0e0;padding:10px 14px;
+                     font-size:.9rem;outline:none;">
+              <option value="approved"
+                {% if user.status=='approved' %}selected{% endif %}>
+                ✅ Approved
+              </option>
+              <option value="pending"
+                {% if user.status=='pending' %}selected{% endif %}>
+                ⏳ Pending
+              </option>
+              <option value="rejected"
+                {% if user.status=='rejected' %}selected{% endif %}>
+                ❌ Rejected
+              </option>
+            </select>
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <label style="display:block;font-size:.72rem;
+                          color:#555;text-transform:uppercase;
+                          letter-spacing:.8px;margin-bottom:7px;">
+              New Password
+              <span style="color:#333;text-transform:none;
+                           letter-spacing:0;margin-left:6px;">
+                (leave blank to keep current)
+              </span>
+            </label>
+            <div class="password-wrap">
+              <input
+                type="password"
+                name="new_password"
+                id="edit-password"
+                placeholder="Enter new password or leave blank"
+                minlength="6"
+                style="width:100%;background:#0f0f1a;
+                       border:1px solid #2a2a4a;
+                       border-radius:7px;color:#e0e0e0;
+                       padding:10px 44px 10px 14px;
+                       font-size:.9rem;outline:none;"
+              />
+              <button type="button"
+                      class="eye-toggle"
+                      onclick="togglePwd('edit-password',this)"
+                      tabindex="-1">
+                👁
+              </button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;">
+            <button type="submit" class="btn-approve"
+                    style="flex:1;padding:11px;
+                           font-size:.9rem;border-radius:8px;">
+              💾 Save Changes
+            </button>
+            <a href="/admin/users"
+               class="btn-reject"
+               style="padding:11px 20px;border-radius:8px;
+                      text-decoration:none;
+                      display:inline-flex;align-items:center;">
+              Cancel
+            </a>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Current info -->
+      <div>
+        <div class="panel-card">
+          <div class="card-header"><h2>Current Details</h2></div>
+          <div style="font-size:.85rem;">
+            <div style="display:flex;justify-content:space-between;
+                        padding:10px 0;border-bottom:1px solid #1e1e38;">
+              <span style="color:#555;">Name</span>
+              <span style="color:#e0e0e0;font-weight:600;">
+                {{ user.full_name }}
+              </span>
+            </div>
+            <div style="display:flex;justify-content:space-between;
+                        padding:10px 0;border-bottom:1px solid #1e1e38;">
+              <span style="color:#555;">Email</span>
+              <span style="color:#888;">{{ user.email }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;
+                        padding:10px 0;border-bottom:1px solid #1e1e38;">
+              <span style="color:#555;">Role</span>
+              <span class="role-badge role-{{ user.role }}">
+                {{ user.role|capitalize }}
+              </span>
+            </div>
+            <div style="display:flex;justify-content:space-between;
+                        padding:10px 0;border-bottom:1px solid #1e1e38;">
+              <span style="color:#555;">Department</span>
+              <span style="color:#a0a8ff;">{{ user.dept_name }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;
+                        padding:10px 0;border-bottom:1px solid #1e1e38;">
+              <span style="color:#555;">Status</span>
+              <span class="status-badge status-{{ user.status }}">
+                {{ user.status|capitalize }}
+              </span>
+            </div>
+            <div style="display:flex;justify-content:space-between;
+                        padding:10px 0;">
+              <span style="color:#555;">Joined</span>
+              <span style="color:#555;font-size:.8rem;">
+                {{ user.created_at[:10] }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Danger zone -->
+        <div class="panel-card"
+             style="border-color:#5c1a1a;">
+          <div class="card-header">
+            <h2 style="color:#e05260;">⚠️ Danger Zone</h2>
+          </div>
+          <p style="font-size:.82rem;color:#555;
+                    margin-bottom:14px;">
+            Permanently delete this user.
+            This cannot be undone.
+          </p>
+          <form method="POST"
+                action="/admin/delete/{{ user.id }}"
+                onsubmit="return confirm(
+                  'Are you sure you want to permanently delete ' +
+                  '{{ user.full_name }}? This cannot be undone.')">
+            <button type="submit" class="btn-delete"
+                    style="padding:9px 20px;font-size:.85rem;">
+              🗑 Delete This User
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+      input.type      = "text";
+      btn.textContent = "🙈";
+    } else {
+      input.type      = "password";
+      btn.textContent = "👁";
+    }
+  }
+</script>
+</body>
+</html>

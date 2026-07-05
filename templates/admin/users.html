@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>All Users</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><span>🔐</span><span>Admin Panel</span></div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard" class="nav-item">📊 Dashboard</a>
+        <a href="/admin/pending" class="nav-item">⏳ Pending Approvals</a>
+        <a href="/admin/users" class="nav-item active">👥 All Users</a>
+        <a href="/admin/departments" class="nav-item">🏛 Departments</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">{{ user.full_name[0] }}</div>
+          <div>
+            <div class="sidebar-name">{{ user.full_name }}</div>
+            <div class="sidebar-role">Administrator</div>
+          </div>
+        </div>
+        <a href="/logout" class="btn-logout">Logout</a>
+      </div>
+    </aside>
+
+    <main class="panel-main">
+      <div class="panel-header">
+        <h1>👥 All Users</h1>
+      </div>
+
+      {% if message %}
+      <div class="alert-panel {{ message_type }}">{{ message }}</div>
+      {% endif %}
+
+      <!-- Filter tabs -->
+      <div class="filter-tabs">
+        <a href="/admin/users"
+           class="filter-tab {% if not role_filter %}active{% endif %}">
+          All
+        </a>
+        <a href="/admin/users?role=teacher"
+           class="filter-tab {% if role_filter=='teacher' %}active{% endif %}">
+          👨‍🏫 Teachers
+        </a>
+        <a href="/admin/users?role=student"
+           class="filter-tab {% if role_filter=='student' %}active{% endif %}">
+          🎓 Students
+        </a>
+      </div>
+
+      <div class="panel-card">
+        <div class="card-header">
+          <h2>
+            {% if role_filter %}
+              {{ role_filter|capitalize }}s
+            {% else %}
+              All Users
+            {% endif %}
+          </h2>
+          <span class="record-count">{{ users|length }} user(s)</span>
+        </div>
+
+        <!-- Search box -->
+        <div style="padding:0 0 16px;">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="🔍 Search by name or email..."
+            oninput="filterTable()"
+            style="background:#0f0f1a;border:1px solid #2a2a4a;
+                   border-radius:7px;color:#e0e0e0;padding:9px 14px;
+                   font-size:0.88rem;width:100%;outline:none;"
+          />
+        </div>
+
+        {% if users %}
+        <div class="table-wrap">
+          <table class="panel-table" id="users-table">
+            <thead>
+              <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Status</th>
+              <th>Face</th>
+              <th>Registered</th>
+              <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in users %}
+              <tr>
+                <td class="td-muted">{{ loop.index }}</td>
+                <td class="td-name">{{ u.full_name }}</td>
+                <td class="td-email">{{ u.email }}</td>
+                <td>
+                  <span class="role-badge role-{{ u.role }}">
+                    {{ u.role|capitalize }}
+                  </span>
+                </td>
+                <td>{{ u.dept_name }}</td>
+                <td>
+                  <span class="status-badge status-{{ u.status }}">
+                    {{ u.status|capitalize }}
+                  </span>
+                </td>
+                <td>
+                  {% if u.role == "student" %}
+                    {% if u.face_registered %}
+                    <span style="color:#4caf82;font-size:.85rem;">
+                      ✅ Done
+                    </span>
+                    {% else %}
+                    <span style="color:#e05260;font-size:.85rem;">
+                      ❌ None
+                    </span>
+                    {% endif %}
+                  {% else %}
+                    <span style="color:#444;font-size:.8rem;">—</span>
+                  {% endif %}
+                </td>
+                <td class="td-date">{{ u.created_at[:10] }}</td>
+                <td>
+                  <div class="action-row">
+                    <div class="action-row">
+                      <a href="/admin/edit/{{ u.id }}"
+                       class="btn-approve"
+                       style="text-decoration:none;
+                              padding:5px 12px;">
+                      ✏️ Edit
+                      </a>
+                    {% if u.status != 'approved' %}
+                    <form method="POST"
+                          action="/admin/approve/{{ u.id }}">
+                      <button class="btn-approve" type="submit"
+                              title="Approve">✓</button>
+                    </form>
+                    {% endif %}
+                    {% if u.status != 'rejected' %}
+                    <form method="POST"
+                          action="/admin/reject/{{ u.id }}">
+                      <button class="btn-reject" type="submit"
+                              title="Reject">✗</button>
+                    </form>
+                    {% endif %}
+                    <form method="POST"
+                          action="/admin/delete/{{ u.id }}"
+                          onsubmit="return confirm('Delete {{ u.full_name }}?')">
+                      <button class="btn-delete" type="submit"
+                              title="Delete">🗑</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-panel">
+          <div class="empty-icon">👤</div>
+          <div>No users found.</div>
+        </div>
+        {% endif %}
+      </div>
+      <!-- Face registration stats -->
+      {% if face_stats %}
+      <div class="panel-card">
+        <div class="card-header">
+          <h2>📸 Face Registration by Department</h2>
+        </div>
+        <table class="panel-table">
+          <thead>
+            <tr>
+              <th>Department</th>
+              <th>Total Students</th>
+              <th>Faces Registered</th>
+              <th>Missing</th>
+              <th>Coverage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for fs in face_stats %}
+            <tr>
+              <td class="td-name">{{ fs.dept_name }}</td>
+              <td style="text-align:center;">{{ fs.total }}</td>
+              <td style="text-align:center;color:#4caf82;
+                         font-weight:600;">
+                {{ fs.registered }}
+              </td>
+              <td style="text-align:center;color:#e05260;">
+                {{ fs.missing }}
+              </td>
+              <td>
+                {% if fs.total > 0 %}
+                {% set pct = ((fs.registered / fs.total) * 100)|round|int %}
+                <div style="background:#0f0f1a;border-radius:6px;
+                            height:8px;overflow:hidden;
+                            min-width:80px;">
+                  <div style="height:100%;border-radius:6px;
+                              width:{{ pct }}%;
+                              background:{% if pct >= 75 %}#4caf82
+                              {% elif pct >= 50 %}#e0a14c
+                              {% else %}#e05260{% endif %};">
+                  </div>
+                </div>
+                <span style="font-size:.72rem;color:#555;
+                             margin-left:6px;">
+                  {{ pct }}%
+                </span>
+                {% else %}
+                <span style="color:#444;font-size:.8rem;">
+                  No students
+                </span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+
+    </main>
+  </div>
+
+  <script>
+    function filterTable() {
+      const q = document.getElementById("search-input")
+                        .value.toLowerCase();
+      document.querySelectorAll("#users-table tbody tr")
+        .forEach(row => {
+          row.style.display =
+            row.textContent.toLowerCase().includes(q) ? "" : "none";
+        });
+    }
+  </script>
+</body>
+</html>

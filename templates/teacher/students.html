@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Students</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+  <link rel="stylesheet" href="/static/teacher.css"/>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span>👨‍🏫</span><span>Teacher Panel</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/teacher/dashboard" class="nav-item">📊 Dashboard</a>
+      <a href="/teacher/students"  class="nav-item active">🎓 My Students</a>
+      <a href="/teacher/attendance" class="nav-item">📷 Mark Attendance</a> 
+      <a href="/teacher/photo-attendance" class="nav-item">
+        🖼 Photo Attendance
+      </a>
+      <a href="/teacher/records"   class="nav-item">📋 Attendance Records</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">{{ user.full_name[0] }}</div>
+        <div>
+          <div class="sidebar-name">{{ user.full_name }}</div>
+          <div class="sidebar-role">{{ user.dept_name }}</div>
+        </div>
+      </div>
+      <a href="/logout" class="btn-logout">Logout</a>
+    </div>
+  </aside>
+
+  <main class="panel-main">
+    <div class="panel-header">
+      <h1>🎓 My Students</h1>
+      <span style="font-size:.85rem;color:#555;">
+        Department: {{ user.dept_name }}
+      </span>
+    </div>
+
+    <div class="panel-card">
+      <div class="card-header">
+        <h2>All Students in {{ user.dept_name }}</h2>
+        <span class="record-count">
+          {{ students|length }} student(s)
+        </span>
+      </div>
+
+      <!-- Search -->
+      <div style="margin-bottom:14px;">
+        <input
+          type="text"
+          id="search-input"
+          placeholder="🔍 Search by name or email..."
+          oninput="filterTable()"
+          style="background:#0f0f1a;border:1px solid #2a2a4a;
+                 border-radius:7px;color:#e0e0e0;padding:9px 14px;
+                 font-size:0.88rem;width:100%;outline:none;"
+        />
+      </div>
+
+      {% if students %}
+      <div class="table-wrap">
+        <table class="panel-table" id="stud-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Face</th>
+              <th>Total Present</th>
+              <th>Attendance %</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in students %}
+            <tr>
+              <td class="td-muted">{{ loop.index }}</td>
+              <td class="td-name">{{ s.full_name }}</td>
+              <td class="td-email">{{ s.email }}</td>
+              <td style="text-align:center;">
+                {% if s.face_registered %}
+                <span title="Face registered"
+                      style="color:#4caf82;">✅</span>
+                {% else %}
+                <span title="Face not registered"
+                      style="color:#e05260;">❌</span>
+                {% endif %}
+              </td>
+              <td style="text-align:center;">
+                {{ s.present_days }}
+              </td>
+              <td style="text-align:center;">
+                <span class="attendance-pct
+                  {% if s.percentage >= 75 %}pct-high
+                  {% elif s.percentage >= 50 %}pct-mid
+                  {% else %}pct-low{% endif %}">
+                  {{ s.percentage }}%
+                </span>
+              </td>
+              <td class="td-date">{{ s.created_at[:10] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-panel">
+        <div class="empty-icon">🎓</div>
+        <div>No approved students in your department yet.</div>
+      </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+<script>
+  function filterTable() {
+    const q = document.getElementById("search-input")
+                      .value.toLowerCase();
+    document.querySelectorAll("#stud-table tbody tr")
+      .forEach(row => {
+        row.style.display =
+          row.textContent.toLowerCase().includes(q) ? "" : "none";
+      });
+  }
+</script>
+</body>
+</html>

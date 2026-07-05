@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — Smart Attendance</title>
+  <link rel="stylesheet" href="/static/auth.css"/>
+  <style>
+    .select-body {
+      min-height: 100vh;
+      background: #0f0f1a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .select-card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 20px;
+      padding: 44px 40px;
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    }
+
+    .select-logo {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+    }
+
+    .select-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #e0e0e0;
+      margin-bottom: 6px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .select-sub {
+      font-size: 0.85rem;
+      color: #555;
+      margin-bottom: 36px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .role-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .role-card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 18px 22px;
+      border-radius: 14px;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: all 0.25s;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .role-card:hover {
+      transform: translateX(5px);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+    }
+
+    /* Admin card */
+    .rc-admin {
+      background: #2b1a1a;
+      border-color: #5c2a2a;
+    }
+
+    .rc-admin:hover {
+      background: #3a1a1a;
+      border-color: #e05260;
+    }
+
+    /* Teacher card */
+    .rc-teacher {
+      background: #1a1a2b;
+      border-color: #2a2a5c;
+    }
+
+    .rc-teacher:hover {
+      background: #1a1a3a;
+      border-color: #7c83fd;
+    }
+
+    /* Student card */
+    .rc-student {
+      background: #0d2b1f;
+      border-color: #1a5c3a;
+    }
+
+    .rc-student:hover {
+      background: #0d3a28;
+      border-color: #4caf82;
+    }
+
+    .rc-icon {
+      font-size: 2.2rem;
+      flex-shrink: 0;
+    }
+
+    .rc-info { flex: 1; }
+
+    .rc-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 3px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .rc-admin   .rc-title { color: #e05260; }
+    .rc-teacher .rc-title { color: #7c83fd; }
+    .rc-student .rc-title { color: #4caf82; }
+
+    .rc-desc {
+      font-size: 0.78rem;
+      color: #555;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .rc-arrow {
+      font-size: 1.2rem;
+      color: #333;
+      transition: all 0.2s;
+    }
+
+    .role-card:hover .rc-arrow { color: #888; }
+
+    .select-footer {
+      margin-top: 28px;
+      font-size: 0.82rem;
+      color: #444;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .select-footer a {
+      color: #7c83fd;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="select-body">
+
+  <div class="select-card">
+    <div class="select-logo">📷</div>
+    <div class="select-title">Eduface</div>
+    <div class="select-sub">Choose your role to continue</div>
+
+    <div class="role-cards">
+
+      <a href="/login/admin" class="role-card rc-admin">
+        <span class="rc-icon">🔐</span>
+        <div class="rc-info">
+          <div class="rc-title">Administrator</div>
+          <div class="rc-desc">
+            Manage users, departments and approvals
+          </div>
+        </div>
+        <span class="rc-arrow">→</span>
+      </a>
+
+      <a href="/login/teacher" class="role-card rc-teacher">
+        <span class="rc-icon">👨‍🏫</span>
+        <div class="rc-info">
+          <div class="rc-title">Teacher</div>
+          <div class="rc-desc">
+            Mark attendance and view department students
+          </div>
+        </div>
+        <span class="rc-arrow">→</span>
+      </a>
+
+      <a href="/login/student" class="role-card rc-student">
+        <span class="rc-icon">🎓</span>
+        <div class="rc-info">
+          <div class="rc-title">Student</div>
+          <div class="rc-desc">
+            View your attendance records and percentage
+          </div>
+        </div>
+        <span class="rc-arrow">→</span>
+      </a>
+
+    </div>
+
+    <div class="select-footer">
+      Don't have an account?
+      <a href="/register">Register here</a>
+    </div>
+  </div>
+
+</body>
+</html>

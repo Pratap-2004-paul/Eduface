@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Photo Attendance</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+  <link rel="stylesheet" href="/static/teacher.css"/>
+  <style>
+    /* ── Photo upload specific ── */
+    .photo-drop {
+      border: 2px dashed #3a3a6a;
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+      background: #0f0f1a;
+    }
+
+    .photo-drop:hover,
+    .photo-drop.dragover {
+      border-color: #7c83fd;
+      background: #16213e;
+    }
+
+    .photo-drop input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .pd-icon  { font-size: 2.5rem; margin-bottom: 10px; }
+    .pd-title { font-size: .9rem; color: #a0a8ff; font-weight: 600; margin-bottom: 5px; }
+    .pd-sub   { font-size: .78rem; color: #555; }
+    .pd-sub span { color: #7c83fd; font-weight: 600; }
+
+    /* ── Preview ── */
+    .preview-img {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #2a2a4a;
+      margin-top: 12px;
+      display: none;
+      max-height: 200px;
+      object-fit: cover;
+    }
+
+    /* ── Multi photo grid ── */
+    .multi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .multi-thumb {
+      aspect-ratio: 1;
+      border-radius: 7px;
+      overflow: hidden;
+      border: 1px solid #2a2a4a;
+      position: relative;
+    }
+
+    .multi-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ── Result cards ── */
+    .result-card {
+      background: #0f0f1a;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: .85rem;
+      border-left: 3px solid transparent;
+    }
+
+    .rc-marked  { border-left-color: #4caf82; }
+    .rc-already { border-left-color: #e0a14c; }
+    .rc-unknown { border-left-color: #e05260; }
+
+    .rc-name {
+      font-weight: 700;
+      color: #e0e0e0;
+      flex: 1;
+    }
+
+    .rc-msg {
+      font-size: .75rem;
+      color: #555;
+    }
+
+    /* ── Summary pills ── */
+    .summary-pills {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .s-pill {
+      background: #0f0f1a;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 10px 18px;
+      text-align: center;
+      flex: 1;
+      min-width: 90px;
+    }
+
+    .s-pill .sp-num {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #7c83fd;
+    }
+
+    .s-pill .sp-lbl {
+      font-size: .65rem;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-top: 3px;
+    }
+
+    /* ── Progress ── */
+    .prog-wrap {
+      background: #0f0f1a;
+      border-radius: 8px;
+      height: 7px;
+      margin: 12px 0;
+      overflow: hidden;
+      display: none;
+    }
+
+    .prog-bar {
+      height: 100%;
+      background: linear-gradient(90deg,#7c83fd,#4caf82);
+      border-radius: 8px;
+      width: 0%;
+      transition: width .3s;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%,100%{opacity:1;}50%{opacity:.6;}
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span>👨‍🏫</span><span>Teacher Panel</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/teacher/dashboard"       class="nav-item">📊 Dashboard</a>
+      <a href="/teacher/students"        class="nav-item">🎓 My Students</a>
+      <a href="/teacher/attendance"      class="nav-item">📷 Live Camera</a>
+      <a href="/teacher/photo-attendance" class="nav-item active">🖼 Photo Attendance</a>
+      <a href="/teacher/records"         class="nav-item">📋 Records</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">{{ user.full_name[0] }}</div>
+        <div>
+          <div class="sidebar-name">{{ user.full_name }}</div>
+          <div class="sidebar-role">{{ user.dept_name }}</div>
+        </div>
+      </div>
+      <a href="/logout" class="btn-logout">Logout</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="panel-main">
+    <div class="panel-header">
+      <h1>🖼 Photo Attendance</h1>
+      <span style="font-size:.85rem;color:#555;">
+        {{ user.dept_name }}
+      </span>
+    </div>
+
+    <!-- Mode tabs -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tab-group"
+              onclick="switchMode('group')">
+        📸 Group Photo
+      </button>
+      <button class="mode-tab" id="tab-multi"
+              onclick="switchMode('multi')">
+        🗂 Multiple Photos
+      </button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;
+                gap:20px;align-items:start;">
+
+      <!-- Left: Upload -->
+      <div>
+
+        <!-- GROUP PHOTO MODE -->
+        <div id="group-mode">
+          <div class="cam-card">
+            <h2>📸 Upload Group Photo</h2>
+            <p style="color:#555;font-size:.82rem;
+                      margin-bottom:14px;">
+              Upload one photo of the whole class.
+              System will find and recognize all faces.
+            </p>
+
+            <div class="photo-drop" id="group-drop">
+              <input type="file" id="group-input"
+                     accept="image/*"
+                     onchange="onGroupSelected(this)"/>
+              <div class="pd-icon">📸</div>
+              <div class="pd-title">
+                Upload Class Group Photo
+              </div>
+              <div class="pd-sub">
+                or <span>click to browse</span>
+              </div>
+            </div>
+
+            <img id="group-preview" class="preview-img"/>
+
+            <div class="prog-wrap" id="group-prog-wrap">
+              <div class="prog-bar" id="group-prog-bar"></div>
+            </div>
+
+            <div class="btn-row" style="margin-top:14px;">
+              <button class="btn btn-secondary"
+                      onclick="clearGroup()">
+                ✕ Clear
+              </button>
+              <button class="btn btn-primary"
+                      id="btn-group"
+                      onclick="submitGroupPhoto()"
+                      disabled>
+                🔍 Find All Faces
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MULTI PHOTO MODE -->
+        <div id="multi-mode" style="display:none;">
+          <div class="cam-card">
+            <h2>🗂 Upload Individual Photos</h2>
+            <p style="color:#555;font-size:.82rem;
+                      margin-bottom:14px;">
+              Upload multiple photos — one student per photo.
+              System processes each photo separately.
+            </p>
+
+            <div class="photo-drop" id="multi-drop">
+              <input type="file" id="multi-input"
+                     accept="image/*"
+                     multiple
+                     onchange="onMultiSelected(this)"/>
+              <div class="pd-icon">🗂</div>
+              <div class="pd-title">
+                Upload Student Photos
+              </div>
+              <div class="pd-sub">
+                or <span>click to browse</span> — select multiple
+              </div>
+            </div>
+
+            <div class="multi-grid" id="multi-grid"></div>
+
+            <div style="margin-top:10px;font-size:.78rem;
+                        color:#555;" id="multi-count"></div>
+
+            <div class="prog-wrap" id="multi-prog-wrap">
+              <div class="prog-bar" id="multi-prog-bar"></div>
+            </div>
+
+            <div class="btn-row" style="margin-top:14px;">
+              <button class="btn btn-secondary"
+                      onclick="clearMulti()">
+                ✕ Clear
+              </button>
+              <button class="btn btn-primary"
+                      id="btn-multi"
+                      onclick="submitMultiPhotos()"
+                      disabled>
+                🔍 Process Photos
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Results -->
+      <div>
+        <div class="cam-card">
+          <h2>📋 Recognition Results</h2>
+
+          <!-- Summary pills (hidden until result) -->
+          <div class="summary-pills"
+               id="summary-pills" style="display:none;">
+            <div class="s-pill">
+              <div class="sp-num" id="sp-faces">0</div>
+              <div class="sp-lbl">Faces Found</div>
+            </div>
+            <div class="s-pill">
+              <div class="sp-num" id="sp-marked"
+                   style="color:#4caf82;">0</div>
+              <div class="sp-lbl">Newly Marked</div>
+            </div>
+            <div class="s-pill">
+              <div class="sp-num" id="sp-unknown"
+                   style="color:#e05260;">0</div>
+              <div class="sp-lbl">Unknown</div>
+            </div>
+          </div>
+
+          <div id="result-list">
+            <div class="result-item result-info">
+              ℹ️ Upload a photo to see results here.
+            </div>
+          </div>
+        </div>
+
+        <!-- Today summary -->
+        <div class="cam-card" style="margin-top:0;">
+          <h2>✅ Marked Today
+            <span style="float:right;font-size:1.1rem;
+                         color:#7c83fd;font-weight:700;"
+                  id="today-count">
+              {{ today_count }}
+            </span>
+          </h2>
+          <div id="today-list">
+            {% if today_records %}
+              {% for r in today_records %}
+              <div class="result-item result-success"
+                   style="margin-bottom:6px;">
+                ✅ {{ r.student_name }}
+                <span style="margin-left:auto;
+                             font-size:.78rem;color:#1a5c3a;">
+                  {{ r.time }}
+                </span>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="result-item result-info">
+                No attendance marked yet today.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end grid -->
+  </main>
+</div>
+
+<script>
+  const deptId = {{ user.dept_id }};
+
+  let groupFile   = null;
+  let multiFiles  = [];
+
+  // ── Mode switch ───────────────────────────────
+  function switchMode(mode) {
+    const isGroup = mode === "group";
+    document.getElementById("group-mode").style.display =
+      isGroup ? "block" : "none";
+    document.getElementById("multi-mode").style.display =
+      isGroup ? "none"  : "block";
+    document.getElementById("tab-group")
+      .classList.toggle("active",  isGroup);
+    document.getElementById("tab-multi")
+      .classList.toggle("active", !isGroup);
+    clearResults();
+  }
+
+  // ══════════════════════════════════════════════
+  //  GROUP PHOTO
+  // ══════════════════════════════════════════════
+
+  function onGroupSelected(input) {
+    if (input.files && input.files[0]) {
+      groupFile = input.files[0];
+      const preview = document.getElementById("group-preview");
+      preview.src = URL.createObjectURL(groupFile);
+      preview.style.display = "block";
+      document.getElementById("btn-group").disabled = false;
+    }
+  }
+
+  function clearGroup() {
+    groupFile = null;
+    document.getElementById("group-input").value = "";
+    document.getElementById("group-preview").style.display = "none";
+    document.getElementById("btn-group").disabled = true;
+    clearResults();
+  }
+
+  function submitGroupPhoto() {
+    if (!groupFile) return;
+
+    const btn  = document.getElementById("btn-group");
+    const wrap = document.getElementById("group-prog-wrap");
+    const bar  = document.getElementById("group-prog-bar");
+
+    btn.disabled    = true;
+    btn.textContent = "⏳ Processing...";
+    wrap.style.display = "block";
+    bar.style.width    = "0%";
+    clearResults();
+    showInfo("🔍 Finding all faces in the group photo...");
+
+    let pct = 0;
+    const timer = setInterval(() => {
+      pct += Math.random() * 12;
+      if (pct > 88) pct = 88;
+      bar.style.width = pct + "%";
+    }, 300);
+
+    const fd = new FormData();
+    fd.append("photo", groupFile);
+
+    fetch("/teacher/group-photo", {
+      method: "POST",
+      body:   fd
+    })
+    .then(r => r.json())
+    .then(data => {
+      clearInterval(timer);
+      bar.style.width = "100%";
+      setTimeout(() => {
+        wrap.style.display = "none";
+        btn.disabled    = false;
+        btn.textContent = "🔍 Find All Faces";
+        renderResults(data);
+        refreshToday();
+      }, 400);
+    })
+    .catch(err => {
+      clearInterval(timer);
+      wrap.style.display = "none";
+      btn.disabled    = false;
+      btn.textContent = "🔍 Find All Faces";
+      showError("❌ Error: " + err.message);
+    });
+  }
+
+  // ══════════════════════════════════════════════
+  //  MULTI PHOTO
+  // ══════════════════════════════════════════════
+
+  function onMultiSelected(input) {
+    if (input.files) {
+      multiFiles = Array.from(input.files);
+      renderMultiGrid();
+      document.getElementById("btn-multi").disabled =
+        multiFiles.length === 0;
+      document.getElementById("multi-count").textContent =
+        `${multiFiles.length} photo(s) selected`;
+    }
+  }
+
+  function renderMultiGrid() {
+    const grid = document.getElementById("multi-grid");
+    grid.innerHTML = "";
+    multiFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const div = document.createElement("div");
+        div.className = "multi-thumb";
+        div.innerHTML =
+          `<img src="${e.target.result}"
+                alt="${file.name}"/>`;
+        grid.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function clearMulti() {
+    multiFiles = [];
+    document.getElementById("multi-input").value = "";
+    document.getElementById("multi-grid").innerHTML = "";
+    document.getElementById("multi-count").textContent = "";
+    document.getElementById("btn-multi").disabled = true;
+    clearResults();
+  }
+
+  function submitMultiPhotos() {
+    if (multiFiles.length === 0) return;
+
+    const btn  = document.getElementById("btn-multi");
+    const wrap = document.getElementById("multi-prog-wrap");
+    const bar  = document.getElementById("multi-prog-bar");
+
+    btn.disabled    = true;
+    btn.textContent = "⏳ Processing...";
+    wrap.style.display = "block";
+    bar.style.width    = "0%";
+    clearResults();
+    showInfo(
+      `🔍 Processing ${multiFiles.length} photo(s)...`
+    );
+
+    let pct = 0;
+    const timer = setInterval(() => {
+      pct += Math.random() * 10;
+      if (pct > 88) pct = 88;
+      bar.style.width = pct + "%";
+    }, 300);
+
+    const fd = new FormData();
+    multiFiles.forEach(f => fd.append("photos", f));
+
+    fetch("/teacher/multi-photo", {
+      method: "POST",
+      body:   fd
+    })
+    .then(r => r.json())
+    .then(data => {
+      clearInterval(timer);
+      bar.style.width = "100%";
+      setTimeout(() => {
+        wrap.style.display = "none";
+        btn.disabled    = false;
+        btn.textContent = "🔍 Process Photos";
+        renderResults(data, true);
+        refreshToday();
+      }, 400);
+    })
+    .catch(err => {
+      clearInterval(timer);
+      wrap.style.display = "none";
+      btn.disabled    = false;
+      btn.textContent = "🔍 Process Photos";
+      showError("❌ Error: " + err.message);
+    });
+  }
+
+  // ══════════════════════════════════════════════
+  //  RENDER RESULTS
+  // ══════════════════════════════════════════════
+
+  function renderResults(data, isMulti) {
+    const list = document.getElementById("result-list");
+    list.innerHTML = "";
+
+    if (!data.success) {
+      showError("❌ " + data.message);
+      return;
+    }
+
+    // Summary pills
+    const pills = document.getElementById("summary-pills");
+    pills.style.display = "flex";
+    document.getElementById("sp-faces").textContent =
+      data.total_faces || data.total_photos || 0;
+    document.getElementById("sp-marked").textContent =
+      data.marked_count || 0;
+
+    const unknowns = (data.results || [])
+      .filter(r => r.name === "Unknown" ||
+                   r.name === "No face").length;
+    document.getElementById("sp-unknown").textContent =
+      unknowns;
+
+    if (!data.results || data.results.length === 0) {
+      showInfo("No students recognized.");
+      return;
+    }
+
+    data.results.forEach(r => {
+      const div = document.createElement("div");
+
+      let cls = "rc-unknown";
+      let icon = "❓";
+
+      if (r.marked) {
+        cls  = "rc-marked";
+        icon = "✅";
+      } else if (r.name !== "Unknown" &&
+                 r.name !== "No face" &&
+                 r.name !== "Error") {
+        cls  = "rc-already";
+        icon = "⚠️";
+      }
+
+      const fileLabel = isMulti && r.file
+        ? `<span style="font-size:.7rem;color:#333;
+                        display:block;margin-top:2px;">
+             📄 ${r.file}
+           </span>`
+        : "";
+
+      div.className = `result-card ${cls}`;
+      div.innerHTML = `
+        <span style="font-size:1.1rem;">${icon}</span>
+        <div style="flex:1;">
+          <div class="rc-name">${r.name}</div>
+          <div class="rc-msg">${r.message}</div>
+          ${fileLabel}
+        </div>`;
+      list.appendChild(div);
+    });
+  }
+
+  // ══════════════════════════════════════════════
+  //  HELPERS
+  // ══════════════════════════════════════════════
+
+  function clearResults() {
+    document.getElementById("result-list").innerHTML =
+      `<div class="result-item result-info">
+         ℹ️ Upload a photo to see results here.
+       </div>`;
+    document.getElementById("summary-pills")
+            .style.display = "none";
+  }
+
+  function showInfo(msg) {
+    document.getElementById("result-list").innerHTML =
+      `<div class="result-item result-info">${msg}</div>`;
+  }
+
+  function showError(msg) {
+    document.getElementById("result-list").innerHTML =
+      `<div class="result-item result-error">${msg}</div>`;
+  }
+
+  function refreshToday() {
+    fetch("/teacher/today-count?dept_id=" + deptId)
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById("today-count")
+                .textContent = d.count;
+      });
+
+    fetch("/teacher/today-records?dept_id=" + deptId)
+      .then(r => r.json())
+      .then(d => {
+        const list =
+          document.getElementById("today-list");
+        if (!d.records || d.records.length === 0) {
+          list.innerHTML =
+            `<div class="result-item result-info">
+               No attendance marked yet today.
+             </div>`;
+          return;
+        }
+        list.innerHTML = d.records.map(r => `
+          <div class="result-item result-success"
+               style="margin-bottom:6px;">
+            ✅ ${r.student_name}
+            <span style="margin-left:auto;
+                         font-size:.78rem;color:#1a5c3a;">
+              ${r.time}
+            </span>
+          </div>`).join("");
+      });
+  }
+
+  // Drag and drop for group photo
+  const groupDrop = document.getElementById("group-drop");
+  groupDrop.addEventListener("dragover", e => {
+    e.preventDefault();
+    groupDrop.classList.add("dragover");
+  });
+  groupDrop.addEventListener("dragleave", () => {
+    groupDrop.classList.remove("dragover");
+  });
+  groupDrop.addEventListener("drop", e => {
+    e.preventDefault();
+    groupDrop.classList.remove("dragover");
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith("image/")) {
+      groupFile = file;
+      const preview =
+        document.getElementById("group-preview");
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+      document.getElementById("btn-group").disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>

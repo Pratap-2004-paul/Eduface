@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <div class="header">
+    <h1>📊 Attendance Dashboard</h1>
+    <a href="/" class="nav-link">📷 Mark Attendance</a>
+  </div>
+
+  <!-- ── Dashboard Main ── -->
+  <div class="dash-main">
+
+    <div class="dash-title">Attendance Records</div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-today">—</div>
+        <div class="stat-label">Present Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-total">—</div>
+        <div class="stat-label">Total Records</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-students">—</div>
+        <div class="stat-label">Unique Students</div>
+      </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+
+      <div class="filter-group">
+        <label>Filter by Date</label>
+        <input type="date" id="filter-date" onchange="applyFilters()"/>
+      </div>
+
+      <div class="filter-group">
+        <label>Search Student</label>
+        <input
+          type="text"
+          id="filter-name"
+          placeholder="Type name..."
+          oninput="applyFilters()"
+        />
+      </div>
+
+      <div class="filter-group" style="flex:0;">
+        <label>&nbsp;</label>
+        <button class="btn btn-secondary" onclick="clearFilters()">
+          ✕ Clear
+        </button>
+      </div>
+
+      <div class="filter-group" style="flex:0;">
+        <label>&nbsp;</label>
+        <a class="btn-export" href="/export" download>
+          ⬇ Export CSV
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3>All Records</h3>
+        <span class="record-count" id="record-count">Loading...</span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Student Name</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <div class="spinner"></div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- end .dash-main -->
+
+  <script>
+    // ── State ─────────────────────────────────────
+    let allRecords = [];
+
+    // ── On page load ──────────────────────────────
+    window.onload = function () {
+      loadRecords();
+      loadStats();
+
+      // Set today's date in filter by default
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("filter-date").value = today;
+    };
+
+    // ── Load all records from backend ─────────────
+    function loadRecords() {
+      fetch("/attendance")
+        .then(r => r.json())
+        .then(data => {
+          allRecords = data.records;
+          applyFilters();
+        })
+        .catch(() => {
+          showEmpty("❌ Could not load records. Is the server running?");
+        });
+    }
+
+    // ── Load stats ────────────────────────────────
+    function loadStats() {
+      // Today count
+      fetch("/today-count")
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById("stat-today").textContent = data.count;
+        });
+
+      // Total and unique students
+      fetch("/attendance")
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById("stat-total").textContent = data.count;
+
+          const unique = new Set(data.records.map(r => r.student_name)).size;
+          document.getElementById("stat-students").textContent = unique;
+        });
+    }
+
+    // ── Apply date + name filters ─────────────────
+    function applyFilters() {
+      const dateVal = document.getElementById("filter-date").value.trim();
+      const nameVal = document.getElementById("filter-name").value.trim().toLowerCase();
+
+      let filtered = allRecords;
+
+      if (dateVal) {
+        filtered = filtered.filter(r => r.date === dateVal);
+      }
+
+      if (nameVal) {
+        filtered = filtered.filter(r =>
+          r.student_name.toLowerCase().includes(nameVal)
+        );
+      }
+
+      renderTable(filtered);
+    }
+
+    // ── Clear filters ─────────────────────────────
+    function clearFilters() {
+      document.getElementById("filter-date").value = "";
+      document.getElementById("filter-name").value = "";
+      applyFilters();
+    }
+
+    // ── Render table rows ─────────────────────────
+    function renderTable(records) {
+      const tbody = document.getElementById("table-body");
+      const countEl = document.getElementById("record-count");
+
+      countEl.textContent = `${records.length} record${records.length !== 1 ? "s" : ""}`;
+
+      if (records.length === 0) {
+        showEmpty("📭 No records found for the selected filter.");
+        return;
+      }
+
+      tbody.innerHTML = records.map((r, i) => `
+        <tr id="row-${r.id}">
+          <td style="color:#444;">${i + 1}</td>
+          <td style="color:#e0e0e0; font-weight:600;">${r.student_name}</td>
+          <td>${formatDate(r.date)}</td>
+          <td>${r.time}</td>
+          <td><span class="badge badge-present">${r.status}</span></td>
+          <td>
+            <button class="btn-del" onclick="deleteRecord(${r.id})">
+              🗑 Delete
+            </button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    // ── Delete a record ───────────────────────────
+    function deleteRecord(id) {
+      if (!confirm("Delete this attendance record?")) return;
+
+      fetch(`/delete/${id}`, { method: "DELETE" })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            // Remove from local array
+            allRecords = allRecords.filter(r => r.id !== id);
+            applyFilters();
+            loadStats();
+          }
+        })
+        .catch(() => alert("Could not delete. Is the server running?"));
+    }
+
+    // ── Helpers ───────────────────────────────────
+    function showEmpty(message) {
+      document.getElementById("table-body").innerHTML = `
+        <tr>
+          <td colspan="6">
+            <div class="empty-state">
+              <div class="empty-icon">📭</div>
+              <div>${message}</div>
+            </div>
+          </td>
+        </tr>
+      `;
+      document.getElementById("record-count").textContent = "0 records";
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "—";
+      const [y, m, d] = dateStr.split("-");
+      const months = ["Jan","Feb","Mar","Apr","May","Jun",
+                      "Jul","Aug","Sep","Oct","Nov","Dec"];
+      return `${d} ${months[parseInt(m) - 1]} ${y}`;
+    }
+  </script>
+
+</body>
+</html>

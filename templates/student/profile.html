@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+  <link rel="stylesheet" href="/static/student.css"/>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span>🎓</span><span>Student Panel</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/student/dashboard"  class="nav-item">📊 Dashboard</a>
+      <a href="/student/attendance" class="nav-item">📋 My Attendance</a>
+      <a href="/student/profile"    class="nav-item active">👤 My Profile</a>
+      <a href="/register-face"      class="nav-item">📸 Register Face</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">{{ user.full_name[0] }}</div>
+        <div>
+          <div class="sidebar-name">{{ user.full_name }}</div>
+          <div class="sidebar-role">{{ user.dept_name }}</div>
+        </div>
+      </div>
+      <a href="/logout" class="btn-logout">Logout</a>
+    </div>
+  </aside>
+
+  <main class="panel-main">
+    <div class="panel-header">
+      <h1>👤 My Profile</h1>
+    </div>
+
+    <div style="display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:20px;align-items:start;">
+
+      <!-- Profile card -->
+      <div class="profile-card">
+        <div class="profile-avatar">
+          {{ user.full_name[0] }}
+        </div>
+        <div class="profile-name">{{ user.full_name }}</div>
+        <div class="profile-email">{{ user.email }}</div>
+
+        <div style="background:#0f0f1a;border:1px solid #2a2a4a;
+                    border-radius:8px;padding:14px 18px;
+                    text-align:left;margin-top:8px;">
+          <div style="display:flex;justify-content:space-between;
+                      padding:8px 0;border-bottom:1px solid #1e1e38;
+                      font-size:.88rem;">
+            <span style="color:#555;">Department</span>
+            <span style="color:#a0a8ff;font-weight:600;">
+              {{ user.dept_name }}
+            </span>
+          </div>
+          <div style="display:flex;justify-content:space-between;
+                      padding:8px 0;border-bottom:1px solid #1e1e38;
+                      font-size:.88rem;">
+            <span style="color:#555;">Role</span>
+            <span style="color:#4caf82;font-weight:600;">
+              Student
+            </span>
+          </div>
+          <div style="display:flex;justify-content:space-between;
+                      padding:8px 0;border-bottom:1px solid #1e1e38;
+                      font-size:.88rem;">
+            <span style="color:#555;">Status</span>
+            <span style="color:#4caf82;font-weight:600;">
+              Approved ✓
+            </span>
+          </div>
+          <div style="display:flex;justify-content:space-between;
+                      padding:8px 0;font-size:.88rem;">
+            <span style="color:#555;">Joined</span>
+            <span style="color:#888;">
+              {{ user.created_at[:10] }}
+            </span>
+          </div>
+        </div>
+
+        <div class="profile-info-row" style="margin-top:18px;">
+          <div class="profile-info-item">
+            <div class="val">{{ stats.present }}</div>
+            <div class="lbl">Present</div>
+          </div>
+          <div class="profile-info-item">
+            <div class="val">{{ stats.total_days }}</div>
+            <div class="lbl">Classes</div>
+          </div>
+          <div class="profile-info-item">
+            <div class="val
+              {% if stats.percentage >= 75 %}pct-high
+              {% elif stats.percentage >= 50 %}pct-mid
+              {% else %}pct-low{% endif %}">
+              {{ stats.percentage }}%
+            </div>
+            <div class="lbl">Attendance</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Face registration status -->
+      <div>
+        <div class="panel-card">
+          <div class="card-header">
+            <h2>📸 Face Registration</h2>
+          </div>
+          {% if face_registered %}
+          <div style="text-align:center;padding:20px 0;">
+            <div style="font-size:3rem;margin-bottom:10px;">✅</div>
+            <div style="color:#4caf82;font-weight:600;
+                        font-size:.95rem;">
+              Face Registered
+            </div>
+            <div style="color:#555;font-size:.82rem;
+                        margin-top:6px;margin-bottom:16px;">
+              Your face is registered. Teachers can mark
+              your attendance automatically.
+            </div>
+            <a href="/register-face"
+               class="btn-approve"
+               style="text-decoration:none;
+                      padding:9px 20px;">
+              Update Face
+            </a>
+          </div>
+          {% else %}
+          <div style="text-align:center;padding:20px 0;">
+            <div style="font-size:3rem;margin-bottom:10px;">❌</div>
+            <div style="color:#e05260;font-weight:600;
+                        font-size:.95rem;">
+              Face Not Registered
+            </div>
+            <div style="color:#555;font-size:.82rem;
+                        margin-top:6px;margin-bottom:16px;">
+              Register your face so teachers can mark
+              your attendance using the camera.
+            </div>
+            <a href="/register-face"
+               class="btn-approve"
+               style="text-decoration:none;
+                      padding:9px 20px;">
+              Register Face Now
+            </a>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Attendance summary -->
+        <div class="panel-card">
+          <div class="card-header">
+            <h2>📊 Attendance Summary</h2>
+          </div>
+          <div class="att-bar-wrap" style="margin-top:4px;">
+            <div class="att-bar-label">
+              <span>Overall Attendance</span>
+              <span style="
+                {% if stats.percentage >= 75 %}color:#4caf82;
+                {% elif stats.percentage >= 50 %}color:#e0a14c;
+                {% else %}color:#e05260;{% endif %}
+                font-weight:700;">
+                {{ stats.percentage }}%
+              </span>
+            </div>
+            <div class="att-bar">
+              <div class="att-bar-fill
+                {% if stats.percentage >= 75 %}bar-high
+                {% elif stats.percentage >= 50 %}bar-mid
+                {% else %}bar-low{% endif %}"
+                   style="width:{{ stats.percentage }}%;">
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:16px;font-size:.82rem;
+                      color:#555;line-height:1.8;">
+            <div>📅 Total classes held: <strong style="color:#ccc;">{{ stats.total_days }}</strong></div>
+            <div>✅ Classes attended:   <strong style="color:#4caf82;">{{ stats.present }}</strong></div>
+            <div>❌ Classes missed:     <strong style="color:#e05260;">{{ stats.total_days - stats.present }}</strong></div>
+          </div>
+          <div style="margin-top:14px;">
+            <a href="/student/attendance"
+               class="btn-link">
+              View full attendance →
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</body>
+</html>

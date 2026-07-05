@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attendance Records</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+  <link rel="stylesheet" href="/static/teacher.css"/>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span>👨‍🏫</span><span>Teacher Panel</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/teacher/dashboard"  class="nav-item">📊 Dashboard</a>
+      <a href="/teacher/students"   class="nav-item">🎓 My Students</a>
+      <a href="/teacher/attendance" class="nav-item">📷 Mark Attendance</a>
+      <a href="/teacher/photo-attendance" class="nav-item">
+        🖼 Photo Attendance
+      </a>
+      <a href="/teacher/records"    class="nav-item active">📋 Attendance Records</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">{{ user.full_name[0] }}</div>
+        <div>
+          <div class="sidebar-name">{{ user.full_name }}</div>
+          <div class="sidebar-role">{{ user.dept_name }}</div>
+        </div>
+      </div>
+      <a href="/logout" class="btn-logout">Logout</a>
+    </div>
+  </aside>
+
+  <main class="panel-main">
+    <div class="panel-header">
+      <h1>📋 Attendance Records</h1>
+      <a href="/teacher/export" class="btn-export">
+        ⬇ Export CSV
+      </a>
+    </div>
+
+    <!-- Filters -->
+    <div style="background:#1a1a2e;border:1px solid #2a2a4a;
+                border-radius:12px;padding:16px 20px;
+                margin-bottom:18px;display:flex;
+                gap:14px;flex-wrap:wrap;align-items:flex-end;">
+      <div style="display:flex;flex-direction:column;
+                  gap:5px;flex:1;min-width:140px;">
+        <label style="font-size:.72rem;color:#555;
+                      text-transform:uppercase;
+                      letter-spacing:.8px;">
+          Filter by Date
+        </label>
+        <input type="date" id="filter-date"
+               onchange="applyFilters()"
+               style="background:#0f0f1a;border:1px solid #2a2a4a;
+                      border-radius:7px;color:#e0e0e0;
+                      padding:8px 12px;font-size:.88rem;outline:none;"/>
+      </div>
+      <div style="display:flex;flex-direction:column;
+                  gap:5px;flex:1;min-width:140px;">
+        <label style="font-size:.72rem;color:#555;
+                      text-transform:uppercase;
+                      letter-spacing:.8px;">
+          Search Student
+        </label>
+        <input type="text" id="filter-name"
+               placeholder="Type name..."
+               oninput="applyFilters()"
+               style="background:#0f0f1a;border:1px solid #2a2a4a;
+                      border-radius:7px;color:#e0e0e0;
+                      padding:8px 12px;font-size:.88rem;outline:none;"/>
+      </div>
+      <div style="flex:0;">
+        <button class="btn btn-secondary"
+                style="padding:8px 16px;"
+                onclick="clearFilters()">
+          ✕ Clear
+        </button>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="card-header">
+        <h2>{{ user.dept_name }} — All Records</h2>
+        <span class="record-count" id="rec-count">
+          {{ records|length }} records
+        </span>
+      </div>
+
+      {% if records %}
+      <div class="table-wrap">
+        <table class="panel-table" id="rec-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Student Name</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Status</th>
+              <th>Marked By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in records %}
+            <tr id="rec-{{ r.id }}">
+              <td class="td-muted">{{ loop.index }}</td>
+              <td class="td-name">{{ r.student_name }}</td>
+              <td class="td-date">{{ r.date }}</td>
+              <td>{{ r.time }}</td>
+              <td>
+                <span class="status-badge status-approved">
+                  {{ r.status }}
+                </span>
+              </td>
+              <td class="td-email">{{ r.teacher_name }}</td>
+              <td>
+                <form method="POST"
+                      action="/teacher/delete-record/{{ r.id }}"
+                      onsubmit="return confirm('Delete this record?')">
+                  <button class="btn-delete" type="submit">🗑</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-panel">
+        <div class="empty-icon">📋</div>
+        <div>No attendance records yet.</div>
+        <div style="margin-top:10px;">
+          <a href="/teacher/attendance"
+             class="btn-approve"
+             style="text-decoration:none;padding:8px 18px;">
+            Mark Attendance
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+
+<script>
+  let allRows = [];
+
+  window.onload = function () {
+    allRows = Array.from(
+      document.querySelectorAll("#rec-table tbody tr")
+    );
+  };
+
+  function applyFilters() {
+    const dateVal = document.getElementById("filter-date")
+                            .value.trim();
+    const nameVal = document.getElementById("filter-name")
+                            .value.trim().toLowerCase();
+    let shown = 0;
+    allRows.forEach(row => {
+      const date = row.cells[2].textContent.trim();
+      const name = row.cells[1].textContent.toLowerCase();
+      const show =
+        (!dateVal || date === dateVal) &&
+        (!nameVal || name.includes(nameVal));
+      row.style.display = show ? "" : "none";
+      if (show) shown++;
+    });
+    document.getElementById("rec-count").textContent =
+      shown + " records";
+  }
+
+  function clearFilters() {
+    document.getElementById("filter-date").value = "";
+    document.getElementById("filter-name").value = "";
+    applyFilters();
+  }
+</script>
+</body>
+</html>

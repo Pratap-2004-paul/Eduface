@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teacher Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+  <link rel="stylesheet" href="/static/teacher.css"/>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span>👨‍🏫</span><span>Teacher Panel</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/teacher/dashboard" class="nav-item active">
+        📊 Dashboard
+      </a>
+      <a href="/teacher/students" class="nav-item">
+        🎓 My Students
+      </a>
+      <a href="/teacher/attendance" class="nav-item">
+        📷 Mark Attendance
+      </a>
+      <a href="/teacher/photo-attendance" class="nav-item">
+        🖼 Photo Attendance
+      </a>
+      <a href="/teacher/records" class="nav-item">
+        📋 Attendance Records
+      </a>
+      <a href="/chat" class="nav-item">
+        💬 Chat
+        {% if unread_count and unread_count > 0 %}
+        <span class="badge-count">{{ unread_count }}</span>
+        {% endif %}
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">
+          {{ user.full_name[0] }}
+        </div>
+        <div>
+          <div class="sidebar-name">{{ user.full_name }}</div>
+          <div class="sidebar-role">{{ user.dept_name }}</div>
+        </div>
+      </div>
+      <a href="/logout" class="btn-logout">Logout</a>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="panel-main">
+    <div class="panel-header">
+      <h1>Dashboard</h1>
+      <span class="panel-date" id="today-date"></span>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-box c-blue">
+        <div class="stat-icon">🎓</div>
+        <div class="stat-num">{{ stats.total_students }}</div>
+        <div class="stat-lbl">My Students</div>
+      </div>
+      <div class="stat-box c-green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-num">{{ stats.today_present }}</div>
+        <div class="stat-lbl">Present Today</div>
+      </div>
+      <div class="stat-box c-amber">
+        <div class="stat-icon">❌</div>
+        <div class="stat-num">{{ stats.today_absent }}</div>
+        <div class="stat-lbl">Absent Today</div>
+      </div>
+      <div class="stat-box c-purple">
+        <div class="stat-icon">📋</div>
+        <div class="stat-num">{{ stats.total_records }}</div>
+        <div class="stat-lbl">Total Records</div>
+      </div>
+    </div>
+
+    <!-- All attendance records -->
+    <div class="panel-card">
+      <div class="card-header">
+        <h2>📋 Attendance Records</h2>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <span class="record-count" id="rec-count">
+            {{ all_records|length }} records
+          </span>
+          <a href="/teacher/attendance" class="btn-link">
+            + Mark More →
+          </a>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div style="display:flex;gap:10px;margin-bottom:14px;
+                  flex-wrap:wrap;align-items:flex-end;">
+        <div style="display:flex;flex-direction:column;
+                    gap:4px;flex:1;min-width:140px;">
+          <label style="font-size:.68rem;color:#555;
+                        text-transform:uppercase;
+                        letter-spacing:.8px;">
+            Filter by Date
+          </label>
+          <input type="date" id="dash-filter-date"
+                 onchange="dashFilter()"
+                 style="background:#0f0f1a;
+                        border:1px solid #2a2a4a;
+                        border-radius:7px;color:#e0e0e0;
+                        padding:7px 10px;font-size:.82rem;
+                        outline:none;"/>
+        </div>
+        <div style="display:flex;flex-direction:column;
+                    gap:4px;flex:1;min-width:140px;">
+          <label style="font-size:.68rem;color:#555;
+                        text-transform:uppercase;
+                        letter-spacing:.8px;">
+            Search Student
+          </label>
+          <input type="text" id="dash-filter-name"
+                 placeholder="Type name..."
+                 oninput="dashFilter()"
+                 style="background:#0f0f1a;
+                        border:1px solid #2a2a4a;
+                        border-radius:7px;color:#e0e0e0;
+                        padding:7px 10px;font-size:.82rem;
+                        outline:none;"/>
+        </div>
+        <button onclick="clearDashFilter()"
+                class="btn btn-secondary"
+                style="padding:7px 14px;align-self:flex-end;">
+          ✕ Clear
+        </button>
+      </div>
+
+      {% if all_records %}
+      <div class="table-wrap">
+        <table class="panel-table" id="dash-att-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Student Name</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Status</th>
+              <th>Marked By</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in all_records %}
+            <tr>
+              <td class="td-muted">{{ loop.index }}</td>
+              <td class="td-name">{{ r.student_name }}</td>
+              <td class="td-date">{{ r.date }}</td>
+              <td>{{ r.time }}</td>
+              <td>
+                <span class="status-badge status-approved">
+                  {{ r.status }}
+                </span>
+              </td>
+              <td class="td-email">{{ r.teacher_name }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-panel">
+        <div class="empty-icon">📋</div>
+        <div>No attendance records yet.</div>
+        <div style="margin-top:10px;">
+          <a href="/teacher/attendance"
+             class="btn-approve"
+             style="text-decoration:none;
+                    padding:8px 18px;">
+            Mark Attendance Now
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Quick student list -->
+    <div class="panel-card">
+      <div class="card-header">
+        <h2>🎓 My Students — {{ user.dept_name }}</h2>
+        <a href="/teacher/students" class="btn-link">
+          View all →
+        </a>
+      </div>
+      {% if students %}
+      <table class="panel-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status Today</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in students[:6] %}
+          <tr>
+            <td class="td-name">{{ s.full_name }}</td>
+            <td class="td-email">{{ s.email }}</td>
+            <td>
+              {% if s.id in today_present_ids %}
+              <span class="status-badge status-approved">
+                Present
+              </span>
+              {% else %}
+              <span class="status-badge status-pending">
+                Absent
+              </span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-panel">
+        <div class="empty-icon">🎓</div>
+        <div>No students in your department yet.</div>
+      </div>
+      {% endif %}
+    </div>
+
+  </main>
+</div>
+<script>
+  document.getElementById("today-date").textContent =
+    new Date().toLocaleDateString("en-IN", {
+      weekday:"long", year:"numeric",
+      month:"long", day:"numeric"
+    });
+</script>
+
+<script>
+  const dashRows = Array.from(
+    document.querySelectorAll("#dash-att-table tbody tr")
+  );
+
+  function dashFilter() {
+    const dateVal = document.getElementById("dash-filter-date")
+                            .value.trim();
+    const nameVal = document.getElementById("dash-filter-name")
+                            .value.trim().toLowerCase();
+    let shown = 0;
+    dashRows.forEach(row => {
+      const date = row.cells[2].textContent.trim();
+      const name = row.cells[1].textContent.toLowerCase();
+      const show =
+        (!dateVal || date === dateVal) &&
+        (!nameVal || name.includes(nameVal));
+      row.style.display = show ? "" : "none";
+      if (show) shown++;
+    });
+    document.getElementById("rec-count").textContent =
+      shown + " records";
+  }
+
+  function clearDashFilter() {
+    document.getElementById("dash-filter-date").value = "";
+    document.getElementById("dash-filter-name").value = "";
+    dashFilter();
+  }
+</script>
+
+</body>
+</html>

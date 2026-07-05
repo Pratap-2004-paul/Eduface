@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Attendance System</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <div style="display:flex;gap:10px;">
+  <a href="/video" class="nav-link" style="background:#2a2a4a;color:#a0a8ff;">🎬 Video Mode</a>
+  <a href="/dashboard" class="nav-link">📊 Dashboard</a>
+</div>
+
+  <!-- ── Main Content ── -->
+  <div class="main">
+
+    <!-- Today's count bar -->
+    <div class="today-bar">
+      <div>Students marked present today</div>
+      <span id="today-count">—</span>
+    </div>
+
+    <!-- Camera Card -->
+    <div class="camera-card">
+      <h2>🎥 Live Camera Feed</h2>
+      <video id="video" autoplay playsinline></video>
+      <canvas id="canvas"></canvas>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btn-start" onclick="startCamera()">
+          ▶ Start Camera
+        </button>
+        <button class="btn btn-primary" id="btn-capture" onclick="captureAndRecognize()" disabled>
+          📸 Mark Attendance
+        </button>
+        <button class="btn btn-danger" id="btn-stop" onclick="stopCamera()" style="display:none;">
+          ⏹ Stop Camera
+        </button>
+      </div>
+    </div>
+
+    <!-- Status Card -->
+    <div class="status-card">
+      <h2>📋 Recognition Result</h2>
+      <div id="status-box">
+        <div class="result-item result-info">
+          ℹ️ Click "Start Camera" then "Mark Attendance" to begin.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .main -->
+
+  <script>
+    // ── State ───────────────────────────────────────
+    let videoStream = null;
+    const video     = document.getElementById("video");
+    const canvas    = document.getElementById("canvas");
+    const statusBox = document.getElementById("status-box");
+    const btnStart  = document.getElementById("btn-start");
+    const btnCapture= document.getElementById("btn-capture");
+    const btnStop   = document.getElementById("btn-stop");
+
+    // ── Load today's count on page load ─────────────
+    window.onload = function() {
+      fetchTodayCount();
+    };
+
+    function fetchTodayCount() {
+      fetch("/today-count")
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById("today-count").textContent = data.count;
+        })
+        .catch(() => {
+          document.getElementById("today-count").textContent = "0";
+        });
+    }
+
+    // ── Start Camera ─────────────────────────────────
+    function startCamera() {
+      navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then(function(stream) {
+          videoStream = stream;
+          video.srcObject = stream;
+          btnStart.style.display   = "none";
+          btnCapture.disabled      = false;
+          btnStop.style.display    = "inline-block";
+          showStatus("✅ Camera started. Click 'Mark Attendance' when ready.", "info");
+        })
+        .catch(function(err) {
+          showStatus("❌ Cannot access camera: " + err.message + ". Please allow camera permission.", "error");
+        });
+    }
+
+    // ── Stop Camera ──────────────────────────────────
+    function stopCamera() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+        video.srcObject = null;
+      }
+      btnStart.style.display   = "inline-block";
+      btnCapture.disabled      = true;
+      btnStop.style.display    = "none";
+      showStatus("⏹ Camera stopped.", "info");
+    }
+
+    // ── Capture & Recognize ──────────────────────────
+    function captureAndRecognize() {
+      if (!videoStream) {
+        showStatus("❌ Please start the camera first.", "error");
+        return;
+      }
+
+      // Draw current video frame onto canvas
+      canvas.width  = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Convert canvas to base64 image
+      const imageData = canvas.toDataURL("image/jpeg", 0.9);
+
+      // Show loading
+      btnCapture.disabled = true;
+      showStatus('<div class="spinner"></div> &nbsp; Recognizing face...', "info");
+
+      // Send to backend
+      fetch("/recognize", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ image: imageData })
+      })
+      .then(r => r.json())
+      .then(data => {
+        btnCapture.disabled = false;
+        handleResult(data);
+        fetchTodayCount(); // update counter
+      })
+      .catch(err => {
+        btnCapture.disabled = false;
+        showStatus("❌ Server error: " + err.message, "error");
+      });
+    }
+
+    // ── Handle recognition result ────────────────────
+    function handleResult(data) {
+      statusBox.innerHTML = "";
+
+      if (!data.success && !data.results) {
+        showStatus("❌ " + data.message, "error");
+        return;
+      }
+
+      if (data.results && data.results.length > 0) {
+        data.results.forEach(function(r) {
+          if (r.name === "Unknown") {
+            addResult("❓ Unknown face — please register this student first.", "error");
+          } else if (r.success) {
+            addResult("✅ " + r.message, "success");
+          } else {
+            addResult("⚠️ " + r.message, "warning");
+          }
+        });
+      } else {
+        showStatus("❌ " + (data.message || "No face detected."), "error");
+      }
+    }
+
+    // ── UI helpers ───────────────────────────────────
+    function showStatus(html, type) {
+      statusBox.innerHTML = `<div class="result-item result-${type}">${html}</div>`;
+    }
+
+    function addResult(html, type) {
+      const div = document.createElement("div");
+      div.className = `result-item result-${type}`;
+      div.innerHTML = html;
+      statusBox.appendChild(div);
+    }
+  </script>
+
+</body>
+</html>

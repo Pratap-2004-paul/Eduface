@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Video Attendance</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <style>
+    /* ── Video page extras ── */
+    .upload-card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 640px;
+      text-align: center;
+    }
+
+    .upload-card h2 {
+      color: #a0a8ff;
+      font-size: 1.05rem;
+      margin-bottom: 24px;
+    }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed #3a3a6a;
+      border-radius: 12px;
+      padding: 48px 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.dragover {
+      border-color: #7c83fd;
+      background: #16213e;
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-icon   { font-size: 3rem; margin-bottom: 12px; }
+    .drop-text   { color: #666; font-size: 0.95rem; }
+    .drop-text span { color: #7c83fd; font-weight: 600; }
+
+    /* Video preview */
+    #video-preview {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #2a2a4a;
+      margin-top: 16px;
+      display: none;
+      max-height: 280px;
+    }
+
+    .file-info {
+      background: #0f0f1a;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 10px 16px;
+      margin-top: 14px;
+      font-size: 0.85rem;
+      color: #888;
+      display: none;
+      text-align: left;
+    }
+
+    .file-info span { color: #a0a8ff; font-weight: 600; }
+
+    /* Progress bar */
+    .progress-wrap {
+      background: #0f0f1a;
+      border-radius: 8px;
+      height: 8px;
+      margin-top: 18px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #7c83fd, #4caf82);
+      border-radius: 8px;
+      width: 0%;
+      transition: width 0.3s;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: 0.6; }
+    }
+
+    .progress-label {
+      font-size: 0.82rem;
+      color: #666;
+      margin-top: 8px;
+      display: none;
+    }
+
+    /* Results card */
+    .results-card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 640px;
+      display: none;
+    }
+
+    .results-card h2 {
+      color: #a0a8ff;
+      font-size: 1.05rem;
+      margin-bottom: 20px;
+    }
+
+    .summary-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .summary-pill {
+      background: #0f0f1a;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 10px 18px;
+      flex: 1;
+      text-align: center;
+      min-width: 110px;
+    }
+
+    .summary-pill .num  { font-size: 1.6rem; font-weight: 700; color: #7c83fd; }
+    .summary-pill .lbl  { font-size: 0.72rem; color: #555; text-transform: uppercase; letter-spacing: .8px; margin-top: 2px; }
+
+    .student-result {
+      background: #0f0f1a;
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      border-left: 3px solid #7c83fd;
+    }
+
+    .student-result.already {
+      border-left-color: #e0a14c;
+    }
+
+    .student-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #e0e0e0;
+      margin-bottom: 6px;
+    }
+
+    .student-meta {
+      font-size: 0.82rem;
+      color: #666;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .student-meta .tag {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 4px;
+      padding: 2px 8px;
+      color: #888;
+    }
+
+    .badge-marked {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #0d2b1f;
+      color: #4caf82;
+      border: 1px solid #1a5c3a;
+      margin-left: 8px;
+    }
+
+    .badge-already {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #2b200d;
+      color: #e0a14c;
+      border: 1px solid #5c3e1a;
+      margin-left: 8px;
+    }
+
+    .timestamps {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .ts-chip {
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.75rem;
+      color: #7c83fd;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: #444;
+    }
+
+    .no-results .icon { font-size: 2.5rem; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>🎬 Video Attendance</h1>
+    <div style="display:flex;gap:10px;">
+      <a href="/" class="nav-link" style="background:#2a2a4a;color:#a0a8ff;">📷 Live Camera</a>
+      <a href="/dashboard" class="nav-link">📊 Dashboard</a>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- Today bar -->
+    <div class="today-bar" style="max-width:640px;">
+      <div>Students marked present today</div>
+      <span id="today-count">—</span>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="upload-card">
+      <h2>📤 Upload Attendance Video</h2>
+
+      <!-- Drop Zone -->
+      <div class="drop-zone" id="drop-zone">
+        <input type="file" id="video-input" accept="video/*" onchange="onFileSelected(this)"/>
+        <div class="drop-icon">🎥</div>
+        <div class="drop-text">
+          Drag & drop a video here<br/>
+          or <span>click to browse</span>
+        </div>
+      </div>
+
+      <!-- Video preview -->
+      <video id="video-preview" controls></video>
+
+      <!-- File info -->
+      <div class="file-info" id="file-info">
+        📄 File: <span id="fname">—</span> &nbsp;|&nbsp;
+        Size: <span id="fsize">—</span> &nbsp;|&nbsp;
+        Type: <span id="ftype">—</span>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div class="progress-label" id="progress-label">⏳ Processing video...</div>
+
+      <!-- Buttons -->
+      <div class="btn-row" style="margin-top:20px;">
+        <button class="btn btn-secondary" onclick="clearVideo()">✕ Clear</button>
+        <button class="btn btn-primary" id="btn-process" onclick="processVideo()" disabled>
+          🔍 Process Video
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Card -->
+    <div class="results-card" id="results-card">
+      <h2>📋 Recognition Results</h2>
+
+      <!-- Summary pills -->
+      <div class="summary-bar">
+        <div class="summary-pill">
+          <div class="num" id="res-duration">—</div>
+          <div class="lbl">Video Seconds</div>
+        </div>
+        <div class="summary-pill">
+          <div class="num" id="res-frames">—</div>
+          <div class="lbl">Frames Checked</div>
+        </div>
+        <div class="summary-pill">
+          <div class="num" id="res-found">—</div>
+          <div class="lbl">Students Found</div>
+        </div>
+        <div class="summary-pill">
+          <div class="num" id="res-marked">—</div>
+          <div class="lbl">Newly Marked</div>
+        </div>
+      </div>
+
+      <!-- Per-student results -->
+      <div id="results-list"></div>
+    </div>
+
+  </div>
+
+  <script>
+    let selectedFile = null;
+
+    // Load today count
+    window.onload = function () {
+      fetchTodayCount();
+
+      // Drag and drop
+      const zone = document.getElementById("drop-zone");
+      zone.addEventListener("dragover",  e => { e.preventDefault(); zone.classList.add("dragover"); });
+      zone.addEventListener("dragleave", ()  => zone.classList.remove("dragover"));
+      zone.addEventListener("drop", e => {
+        e.preventDefault();
+        zone.classList.remove("dragover");
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith("video/")) loadFile(file);
+        else showAlert("Please drop a video file.");
+      });
+    };
+
+    function fetchTodayCount() {
+      fetch("/today-count")
+        .then(r => r.json())
+        .then(d => { document.getElementById("today-count").textContent = d.count; })
+        .catch(() => {});
+    }
+
+    // File selected via input
+    function onFileSelected(input) {
+      if (input.files && input.files[0]) loadFile(input.files[0]);
+    }
+
+    function loadFile(file) {
+      selectedFile = file;
+
+      // Show preview
+      const preview = document.getElementById("video-preview");
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+
+      // Show file info
+      document.getElementById("fname").textContent  = file.name;
+      document.getElementById("fsize").textContent  = formatBytes(file.size);
+      document.getElementById("ftype").textContent  = file.type || "video";
+      document.getElementById("file-info").style.display = "block";
+
+      // Enable process button
+      document.getElementById("btn-process").disabled = false;
+
+      // Hide old results
+      document.getElementById("results-card").style.display = "none";
+    }
+
+    function clearVideo() {
+      selectedFile = null;
+      document.getElementById("video-input").value    = "";
+      document.getElementById("video-preview").style.display = "none";
+      document.getElementById("video-preview").src    = "";
+      document.getElementById("file-info").style.display    = "none";
+      document.getElementById("btn-process").disabled = true;
+      document.getElementById("progress-wrap").style.display  = "none";
+      document.getElementById("progress-label").style.display = "none";
+      document.getElementById("results-card").style.display   = "none";
+    }
+
+    function processVideo() {
+      if (!selectedFile) {
+        alert("Please select a video first.");
+        return;
+      }
+
+      // Show progress
+      const progressWrap  = document.getElementById("progress-wrap");
+      const progressBar   = document.getElementById("progress-bar");
+      const progressLabel = document.getElementById("progress-label");
+      const btnProcess    = document.getElementById("btn-process");
+
+      progressWrap.style.display  = "block";
+      progressLabel.style.display = "block";
+      progressBar.style.width     = "0%";
+      btnProcess.disabled         = true;
+      btnProcess.textContent      = "⏳ Processing...";
+      document.getElementById("results-card").style.display = "none";
+
+      // Animate progress bar (fake — real progress needs websockets)
+      let fakeProgress = 0;
+      const timer = setInterval(() => {
+        fakeProgress += Math.random() * 8;
+        if (fakeProgress > 90) fakeProgress = 90;
+        progressBar.style.width = fakeProgress + "%";
+      }, 400);
+
+      // Build form data
+      const formData = new FormData();
+      formData.append("video", selectedFile);
+
+      // Send to backend
+      fetch("/process-video", {
+        method: "POST",
+        body:   formData
+      })
+      .then(r => r.json())
+      .then(data => {
+        clearInterval(timer);
+        progressBar.style.width = "100%";
+
+        setTimeout(() => {
+          progressWrap.style.display  = "none";
+          progressLabel.style.display = "none";
+          btnProcess.disabled         = false;
+          btnProcess.textContent      = "🔍 Process Video";
+          displayResults(data);
+          fetchTodayCount();
+        }, 600);
+      })
+      .catch(err => {
+        clearInterval(timer);
+        progressWrap.style.display  = "none";
+        progressLabel.style.display = "none";
+        btnProcess.disabled         = false;
+        btnProcess.textContent      = "🔍 Process Video";
+        alert("Error: " + err.message);
+      });
+    }
+
+    function displayResults(data) {
+      const card = document.getElementById("results-card");
+      card.style.display = "block";
+
+      if (!data.success) {
+        document.getElementById("results-list").innerHTML = `
+          <div class="no-results">
+            <div class="icon">❌</div>
+            <div>${data.message}</div>
+          </div>`;
+        return;
+      }
+
+      // Fill summary pills
+      document.getElementById("res-duration").textContent = data.video_duration + "s";
+      document.getElementById("res-frames").textContent   = data.frames_checked;
+      document.getElementById("res-found").textContent    = data.students_found;
+
+      const newlyMarked = data.results.filter(r => r.marked).length;
+      document.getElementById("res-marked").textContent   = newlyMarked;
+
+      // Per-student cards
+      const list = document.getElementById("results-list");
+
+      if (!data.results || data.results.length === 0) {
+        list.innerHTML = `
+          <div class="no-results">
+            <div class="icon">😕</div>
+            <div>No registered students found in this video.</div>
+            <div style="margin-top:8px;font-size:0.82rem;color:#555;">
+              Make sure students are registered via train_model.py
+            </div>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = data.results.map(r => `
+        <div class="student-result ${r.marked ? "" : "already"}">
+          <div class="student-name">
+            ${r.marked ? "✅" : "⚠️"} ${r.name}
+            ${r.marked
+              ? '<span class="badge-marked">Marked Present</span>'
+              : '<span class="badge-already">Already Marked Today</span>'}
+          </div>
+          <div class="student-meta">
+            <span class="tag">👁 Seen in ${r.seen_count} frame${r.seen_count !== 1 ? "s" : ""}</span>
+            <span class="tag">🕐 First seen at ${formatTime(r.seen_at[0])}</span>
+            <span class="tag">🕐 Last seen at ${formatTime(r.seen_at[r.seen_at.length - 1])}</span>
+          </div>
+          <div class="timestamps">
+            ${r.seen_at.map(t => `<span class="ts-chip">${formatTime(t)}</span>`).join("")}
+          </div>
+        </div>
+      `).join("");
+
+      // Scroll to results
+      card.scrollIntoView({ behavior: "smooth" });
+    }
+
+    // ── Helpers ──────────────────────────────────
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+      const s = (seconds % 60).toString().padStart(2, "0");
+      return `${m}:${s}`;
+    }
+
+    function formatBytes(bytes) {
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+      return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    function showAlert(msg) {
+      alert(msg);
+    }
+  </script>
+
+</body>
+</html>

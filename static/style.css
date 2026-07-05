@@ -1,0 +1,458 @@
+/* ── Reset & Base ─────────────────────────────── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #0f0f1a;
+  color: #e0e0e0;
+  min-height: 100vh;
+}
+
+/* ── Header ───────────────────────────────────── */
+.header {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #2a2a4a;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+}
+
+.header h1 {
+  font-size: 1.4rem;
+  color: #7c83fd;
+  letter-spacing: 1px;
+}
+
+.header .nav-link {
+  background: #7c83fd;
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.header .nav-link:hover {
+  background: #5a63e8;
+}
+
+/* ── Main Layout ──────────────────────────────── */
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  gap: 28px;
+}
+
+/* ── Camera Box ───────────────────────────────── */
+.camera-card {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 620px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.camera-card h2 {
+  font-size: 1.1rem;
+  color: #a0a8ff;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+#video {
+  width: 100%;
+  max-width: 560px;
+  border-radius: 10px;
+  border: 2px solid #2a2a4a;
+  background: #000;
+}
+
+#canvas {
+  display: none;
+}
+
+/* ── Buttons ──────────────────────────────────── */
+.btn-row {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary {
+  background: #7c83fd;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #5a63e8;
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  background: #3a3a5a;
+  color: #666;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: #2a2a4a;
+  color: #a0a8ff;
+  border: 1px solid #3a3a6a;
+}
+
+.btn-secondary:hover {
+  background: #3a3a6a;
+}
+
+.btn-danger {
+  background: #e05260;
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: #c0404e;
+}
+
+/* ── Status Box ───────────────────────────────── */
+.status-card {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 16px;
+  padding: 24px 28px;
+  width: 100%;
+  max-width: 620px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.status-card h2 {
+  font-size: 1rem;
+  color: #a0a8ff;
+  margin-bottom: 16px;
+}
+
+#status-box {
+  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.result-item {
+  padding: 14px 18px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.result-success {
+  background: #0d2b1f;
+  border: 1px solid #1a5c3a;
+  color: #4caf82;
+}
+
+.result-warning {
+  background: #2b200d;
+  border: 1px solid #5c3e1a;
+  color: #e0a14c;
+}
+
+.result-error {
+  background: #2b0d0d;
+  border: 1px solid #5c1a1a;
+  color: #e05260;
+}
+
+.result-info {
+  background: #0d1a2b;
+  border: 1px solid #1a3a5c;
+  color: #4c9fe0;
+}
+
+/* ── Today counter ────────────────────────────── */
+.today-bar {
+  background: #16213e;
+  border: 1px solid #2a2a4a;
+  border-radius: 10px;
+  padding: 14px 24px;
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.95rem;
+}
+
+.today-bar span {
+  color: #7c83fd;
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+/* ── Loading spinner ──────────────────────────── */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid #3a3a5a;
+  border-top-color: #7c83fd;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+
+/* ── Dashboard ────────────────────────────────── */
+.dash-main {
+  padding: 32px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.dash-title {
+  font-size: 1.3rem;
+  color: #a0a8ff;
+  margin-bottom: 24px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Stats Row ────────────────────────────────── */
+.stats-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 20px 28px;
+  flex: 1;
+  min-width: 160px;
+  text-align: center;
+}
+
+.stat-card .stat-number {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #7c83fd;
+  line-height: 1;
+}
+
+.stat-card .stat-label {
+  font-size: 0.82rem;
+  color: #666;
+  margin-top: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* ── Filter Bar ───────────────────────────────── */
+.filter-bar {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 18px 24px;
+  margin-bottom: 20px;
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.filter-group label {
+  font-size: 0.78rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.filter-group input,
+.filter-group select {
+  background: #0f0f1a;
+  border: 1px solid #2a2a4a;
+  border-radius: 7px;
+  color: #e0e0e0;
+  padding: 9px 13px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  border-color: #7c83fd;
+}
+
+/* ── Table ────────────────────────────────────── */
+.table-card {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table-header {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #2a2a4a;
+}
+
+.table-header h3 {
+  font-size: 0.95rem;
+  color: #a0a8ff;
+}
+
+.record-count {
+  font-size: 0.82rem;
+  color: #555;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+thead th {
+  background: #16213e;
+  color: #7c83fd;
+  padding: 13px 20px;
+  text-align: left;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  border-bottom: 1px solid #2a2a4a;
+  white-space: nowrap;
+}
+
+tbody tr {
+  border-bottom: 1px solid #1e1e38;
+  transition: background 0.15s;
+}
+
+tbody tr:hover {
+  background: #16213e;
+}
+
+tbody td {
+  padding: 13px 20px;
+  color: #ccc;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.badge-present {
+  background: #0d2b1f;
+  color: #4caf82;
+  border: 1px solid #1a5c3a;
+}
+
+.btn-del {
+  background: transparent;
+  border: 1px solid #5c1a1a;
+  color: #e05260;
+  padding: 4px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.btn-del:hover {
+  background: #e05260;
+  color: #fff;
+}
+
+/* ── Empty state ──────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #444;
+}
+
+.empty-state .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+/* ── Export button ────────────────────────────── */
+.btn-export {
+  background: #1a4a2a;
+  color: #4caf82;
+  border: 1px solid #1a5c3a;
+  padding: 9px 20px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.btn-export:hover {
+  background: #4caf82;
+  color: #0d2b1f;
+}

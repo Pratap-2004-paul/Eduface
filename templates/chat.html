@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat — SmartAttend</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+  <link rel="stylesheet" href="/static/chat.css"/>
+  <!-- Socket.IO client -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span>💬</span><span>Chat</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/" class="nav-item">
+        📊 Dashboard
+      </a>
+      <a href="/chat" class="nav-item
+        {% if not chat_with %}active{% endif %}">
+        👥 Group Chat
+      </a>
+      <div class="nav-section-label">
+        Private Messages
+      </div>
+      {% for contact in contacts %}
+      <a href="/chat/private/{{ contact.id }}"
+         class="nav-item
+           {% if chat_with and chat_with.id == contact.id %}
+             active
+           {% endif %}">
+        <div class="contact-avatar-sm">
+          {{ contact.name[0] }}
+        </div>
+        <span class="contact-name-sm">
+          {{ contact.name }}
+        </span>
+        <span class="contact-role-badge
+          {% if contact.role == 'teacher' %}rb-teacher
+          {% else %}rb-student{% endif %}">
+          {{ contact.role[0]|upper }}
+        </span>
+      </a>
+      {% endfor %}
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">
+          {{ user.full_name[0] }}
+        </div>
+        <div>
+          <div class="sidebar-name">{{ user.full_name }}</div>
+          <div class="sidebar-role">{{ user.role|capitalize }}</div>
+        </div>
+      </div>
+      <a href="/logout" class="btn-logout">Logout</a>
+    </div>
+  </aside>
+
+  <!-- ── Chat main area ── -->
+  <main class="chat-main">
+
+    <!-- ════════════════════════════════════════
+         GROUP CHAT MODE
+    ════════════════════════════════════════ -->
+    {% if not chat_with %}
+
+    <!-- Chat header -->
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-avatar-lg">🏛</div>
+        <div>
+          <div class="chat-header-name">
+            {{ user.dept_name }} — Group Chat
+          </div>
+          <div class="chat-header-sub">
+            All teachers and students in your department
+          </div>
+        </div>
+      </div>
+      <div class="chat-header-badge">
+        👥 Department group
+      </div>
+    </div>
+
+    <!-- Messages area -->
+    <div class="messages-area" id="messages-area">
+      {% if group_messages %}
+        {% for msg in group_messages %}
+        <div class="msg-wrap
+          {% if msg.sender_id == user.id %}
+            msg-mine
+          {% else %}
+            msg-other
+          {% endif %}">
+          {% if msg.sender_id != user.id %}
+          <div class="msg-avatar">
+            {{ msg.sender_name[0] }}
+          </div>
+          {% endif %}
+          <div class="msg-bubble-wrap">
+            {% if msg.sender_id != user.id %}
+            <div class="msg-sender-name">
+              {{ msg.sender_name }}
+              <span class="msg-role-tag
+                {% if msg.sender_role == 'teacher' %}
+                  rt-teacher
+                {% else %}
+                  rt-student
+                {% endif %}">
+                {{ msg.sender_role }}
+              </span>
+            </div>
+            {% endif %}
+            <div class="msg-bubble
+              {% if msg.sender_id == user.id %}
+                bubble-mine
+              {% else %}
+                bubble-other
+              {% endif %}">
+              {{ msg.message }}
+            </div>
+            <div class="msg-time">
+              {{ msg.sent_at[11:16] }}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="chat-empty">
+        <div class="chat-empty-icon">💬</div>
+        <div>No messages yet.</div>
+        <div style="font-size:.78rem;color:#333;margin-top:6px;">
+          Be the first to say hello to your department!
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Typing indicator -->
+    <div class="typing-indicator" id="typing-indicator">
+      <span id="typing-text"></span>
+    </div>
+
+    <!-- Message input -->
+    <div class="chat-input-area">
+      <div class="chat-input-wrap">
+        <input
+          type="text"
+          id="message-input"
+          class="chat-input"
+          placeholder="Type a message to the group..."
+          maxlength="1000"
+          autocomplete="off"
+        />
+        <button class="btn-send" onclick="sendGroupMessage()">
+          ➤
+        </button>
+      </div>
+      <div class="char-count" id="char-count">0/1000</div>
+    </div>
+
+    {% else %}
+
+    <!-- ════════════════════════════════════════
+         PRIVATE CHAT MODE
+    ════════════════════════════════════════ -->
+
+    <!-- Chat header -->
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-avatar-lg
+          {% if chat_with.role == 'teacher' %}
+            ca-teacher
+          {% else %}
+            ca-student
+          {% endif %}">
+          {{ chat_with.full_name[0] }}
+        </div>
+        <div>
+          <div class="chat-header-name">
+            {{ chat_with.full_name }}
+          </div>
+          <div class="chat-header-sub">
+            {{ chat_with.role|capitalize }} •
+            {{ user.dept_name }}
+          </div>
+        </div>
+      </div>
+      <div class="chat-header-badge">
+        🔒 Private chat
+      </div>
+    </div>
+
+    <!-- Messages area -->
+    <div class="messages-area" id="messages-area">
+      {% if private_messages %}
+        {% for msg in private_messages %}
+        <div class="msg-wrap
+          {% if msg.sender_id == user.id %}
+            msg-mine
+          {% else %}
+            msg-other
+          {% endif %}">
+          {% if msg.sender_id != user.id %}
+          <div class="msg-avatar ca-teacher">
+            {{ msg.sender_name[0] }}
+          </div>
+          {% endif %}
+          <div class="msg-bubble-wrap">
+            <div class="msg-bubble
+              {% if msg.sender_id == user.id %}
+                bubble-mine
+              {% else %}
+                bubble-other
+              {% endif %}">
+              {{ msg.message }}
+            </div>
+            <div class="msg-time">
+              {{ msg.sent_at[11:16] }}
+              {% if msg.sender_id == user.id %}
+                {% if msg.is_read %}✓✓{% else %}✓{% endif %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="chat-empty">
+        <div class="chat-empty-icon">🔒</div>
+        <div>No messages yet.</div>
+        <div style="font-size:.78rem;color:#333;
+                    margin-top:6px;">
+          Start a private conversation with
+          {{ chat_with.full_name }}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Typing indicator -->
+    <div class="typing-indicator" id="typing-indicator">
+      <span id="typing-text"></span>
+    </div>
+
+    <!-- Message input -->
+    <div class="chat-input-area">
+      <div class="chat-input-wrap">
+        <input
+          type="text"
+          id="message-input"
+          class="chat-input"
+          placeholder="Message {{ chat_with.full_name }}..."
+          maxlength="1000"
+          autocomplete="off"
+        />
+        <button class="btn-send"
+                onclick="sendPrivateMessage()">
+          ➤
+        </button>
+      </div>
+      <div class="char-count" id="char-count">0/1000</div>
+    </div>
+
+    {% endif %}
+
+  </main>
+</div>
+
+<script>
+  // ── Config ────────────────────────────────────
+  const MY_ID       = {{ user.id }};
+  const MY_NAME     = "{{ user.full_name }}";
+  const DEPT_ID     = {{ user.dept_id }};
+  const DEPT_ROOM   = "dept_" + DEPT_ID;
+  const MY_ROOM     = "user_" + MY_ID;
+  const CHAT_WITH   = {% if chat_with %}{{ chat_with.id }}{% else %}null{% endif %};
+  const IS_GROUP    = CHAT_WITH === null;
+
+  // ── Connect to Socket.IO ──────────────────────
+  const socket = io();
+
+  socket.on("connect", function () {
+    console.log("Connected to chat server");
+  });
+
+  // ── Scroll to bottom on load ──────────────────
+  window.onload = function () {
+    scrollToBottom();
+  };
+
+  // ════════════════════════════════════════════
+  //  SEND MESSAGES
+  // ════════════════════════════════════════════
+
+  function sendGroupMessage() {
+    const input = document.getElementById("message-input");
+    const msg   = input.value.trim();
+    if (!msg) return;
+
+    socket.emit("send_group_message", { message: msg });
+    input.value = "";
+    updateCharCount();
+
+    // Stop typing indicator
+    socket.emit("typing", {
+      room:      DEPT_ROOM,
+      is_typing: false
+    });
+  }
+
+  function sendPrivateMessage() {
+    const input = document.getElementById("message-input");
+    const msg   = input.value.trim();
+    if (!msg) return;
+
+    socket.emit("send_private_message", {
+      receiver_id: CHAT_WITH,
+      message:     msg
+    });
+    input.value = "";
+    updateCharCount();
+
+    socket.emit("typing", {
+      room:      "user_" + CHAT_WITH,
+      is_typing: false
+    });
+  }
+
+  // ── Enter key to send ─────────────────────────
+  document.getElementById("message-input")
+    .addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        if (IS_GROUP) sendGroupMessage();
+        else          sendPrivateMessage();
+      }
+    });
+
+  // ── Char counter + typing ─────────────────────
+  document.getElementById("message-input")
+    .addEventListener("input", function () {
+      updateCharCount();
+
+      // Emit typing event
+      const room = IS_GROUP
+        ? DEPT_ROOM
+        : "user_" + CHAT_WITH;
+
+      socket.emit("typing", {
+        room:      room,
+        is_typing: this.value.length > 0
+      });
+    });
+
+  function updateCharCount() {
+    const len = document.getElementById(
+      "message-input"
+    ).value.length;
+    document.getElementById("char-count")
+            .textContent = len + "/1000";
+  }
+
+  // ════════════════════════════════════════════
+  //  RECEIVE MESSAGES
+  // ════════════════════════════════════════════
+
+  socket.on("new_group_message", function (msg) {
+    if (!IS_GROUP) return;
+    appendMessage(msg, msg.sender_id === MY_ID, "group");
+    scrollToBottom();
+    removeEmpty();
+  });
+
+  socket.on("new_private_message", function (msg) {
+    if (IS_GROUP) {
+      // Update unread badge in sidebar
+      updateUnreadBadge();
+      return;
+    }
+    // Only show if this message belongs to current chat
+    const belongs =
+      (msg.sender_id === MY_ID &&
+       msg.receiver_id === CHAT_WITH) ||
+      (msg.sender_id === CHAT_WITH &&
+       msg.receiver_id === MY_ID);
+
+    if (belongs) {
+      appendMessage(msg, msg.sender_id === MY_ID, "private");
+      scrollToBottom();
+      removeEmpty();
+    } else {
+      updateUnreadBadge();
+    }
+  });
+
+  // ── Typing indicator ──────────────────────────
+  let typingTimer = null;
+
+  socket.on("user_typing", function (data) {
+    const indicator =
+      document.getElementById("typing-indicator");
+    const text =
+      document.getElementById("typing-text");
+
+    if (data.is_typing) {
+      text.textContent = data.name + " is typing...";
+      indicator.classList.add("visible");
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(() => {
+        indicator.classList.remove("visible");
+      }, 3000);
+    } else {
+      indicator.classList.remove("visible");
+    }
+  });
+
+  // ════════════════════════════════════════════
+  //  APPEND MESSAGE TO DOM
+  // ════════════════════════════════════════════
+
+  function appendMessage(msg, isMine, type) {
+    const area =
+      document.getElementById("messages-area");
+
+    const wrap = document.createElement("div");
+    wrap.className =
+      "msg-wrap " + (isMine ? "msg-mine" : "msg-other");
+
+    let avatarHtml = "";
+    if (!isMine) {
+      avatarHtml = `
+        <div class="msg-avatar">
+          ${msg.sender_name[0]}
+        </div>`;
+    }
+
+    let senderHtml = "";
+    if (!isMine && type === "group") {
+      const roleClass =
+        msg.sender_role === "teacher"
+          ? "rt-teacher" : "rt-student";
+      senderHtml = `
+        <div class="msg-sender-name">
+          ${msg.sender_name}
+          <span class="msg-role-tag ${roleClass}">
+            ${msg.sender_role}
+          </span>
+        </div>`;
+    }
+
+    const time = msg.sent_at
+      ? msg.sent_at.substring(11, 16)
+      : new Date().toTimeString().substring(0, 5);
+
+    wrap.innerHTML = `
+      ${avatarHtml}
+      <div class="msg-bubble-wrap">
+        ${senderHtml}
+        <div class="msg-bubble
+          ${isMine ? "bubble-mine" : "bubble-other"}">
+          ${escapeHtml(msg.message)}
+        </div>
+        <div class="msg-time">${time}</div>
+      </div>`;
+
+    area.appendChild(wrap);
+  }
+
+  // ── Helpers ───────────────────────────────────
+  function scrollToBottom() {
+    const area =
+      document.getElementById("messages-area");
+    area.scrollTop = area.scrollHeight;
+  }
+
+  function removeEmpty() {
+    const empty =
+      document.querySelector(".chat-empty");
+    if (empty) empty.remove();
+  }
+
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g,  "&amp;")
+      .replace(/</g,  "&lt;")
+      .replace(/>/g,  "&gt;")
+      .replace(/"/g,  "&quot;")
+      .replace(/'/g,  "&#039;");
+  }
+
+  function updateUnreadBadge() {
+    fetch("/chat/unread")
+      .then(r => r.json())
+      .then(d => {
+        // Could add a badge counter here if needed
+        console.log("Unread:", d.count);
+      });
+  }
+</script>
+
+</body>
+</html>

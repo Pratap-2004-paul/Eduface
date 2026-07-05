@@ -1,0 +1,217 @@
+/* ── Student panel styles ─────────────────── */
+
+/* ── Percentage ring ──────────────────────── */
+.pct-ring-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0 16px;
+}
+
+.pct-ring {
+  position: relative;
+  width: 130px;
+  height: 130px;
+}
+
+.pct-ring svg {
+  transform: rotate(-90deg);
+}
+
+.pct-ring .ring-bg {
+  fill: none;
+  stroke: #1e1e38;
+  stroke-width: 10;
+}
+
+.pct-ring .ring-fill {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s ease;
+}
+
+.ring-high { stroke: #4caf82; }
+.ring-mid  { stroke: #e0a14c; }
+.ring-low  { stroke: #e05260; }
+
+.pct-ring .pct-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.pct-ring .pct-num {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  display: block;
+  line-height: 1;
+}
+
+.pct-ring .pct-sub {
+  font-size: 0.68rem;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pct-ring-label {
+  font-size: 0.82rem;
+  color: #666;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* ── Attendance progress bar ──────────────── */
+.att-bar-wrap {
+  margin: 8px 0;
+}
+
+.att-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.att-bar {
+  height: 8px;
+  background: #1e1e38;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.att-bar-fill {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 1s ease;
+}
+
+.bar-high { background: #4caf82; }
+.bar-mid  { background: #e0a14c; }
+.bar-low  { background: #e05260; }
+
+/* ── Calendar heatmap ─────────────────────── */
+.month-label {
+  font-size: 0.78rem;
+  color: #555;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.day-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.day-cell {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  color: #444;
+  cursor: default;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.day-cell.present {
+  background: #0d2b1f;
+  border-color: #1a5c3a;
+  color: #4caf82;
+}
+
+.day-cell.absent {
+  background: #1a1a2e;
+  border-color: #2a2a4a;
+  color: #333;
+}
+
+.day-cell.today {
+  border-color: #7c83fd;
+  color: #7c83fd;
+}
+
+/* ── Record row highlight ─────────────────── */
+.rec-present {
+  border-left: 3px solid #4caf82;
+}
+
+.rec-absent {
+  border-left: 3px solid #e05260;
+  opacity: 0.7;
+}
+
+/* ── Profile card ─────────────────────────── */
+.profile-card {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 28px;
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #7c83fd, #a06cfd);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 auto 14px;
+  text-transform: uppercase;
+}
+
+.profile-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  margin-bottom: 4px;
+}
+
+.profile-email {
+  font-size: 0.82rem;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+.profile-info-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.profile-info-item {
+  text-align: center;
+}
+
+.profile-info-item .val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #7c83fd;
+}
+
+.profile-info-item .lbl {
+  font-size: 0.68rem;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

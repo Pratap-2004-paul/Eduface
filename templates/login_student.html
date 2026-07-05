@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Login — SmartAttend</title>
+  <link rel="stylesheet" href="/static/auth.css"/>
+  <style>
+    body.student-login-body {
+      background: radial-gradient(
+        ellipse at top left,
+        #0d2b1f 0%,
+        #0f0f1a 60%
+      );
+    }
+
+    .student-card {
+      border-color: #1a5c3a;
+    }
+
+    .student-card .auth-logo h1 {
+      color: #4caf82;
+    }
+
+    .student-card .form-group input:focus {
+      border-color: #4caf82;
+      box-shadow: 0 0 0 3px rgba(76,175,130,0.15);
+    }
+
+    .student-card .btn-auth {
+      background: linear-gradient(135deg, #4caf82, #2a9060);
+    }
+
+    .student-card .btn-auth:hover {
+      background: linear-gradient(135deg, #2a9060, #1a7048);
+    }
+
+    .student-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(76,175,130,0.1);
+      border: 1px solid rgba(76,175,130,0.3);
+      color: #4caf82;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #555;
+      text-decoration: none;
+      font-size: 0.82rem;
+      margin-bottom: 20px;
+      transition: color 0.2s;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .back-link:hover { color: #888; }
+  </style>
+</head>
+<body class="auth-body student-login-body">
+
+  <a href="/login" class="back-link">← Back to role selection</a>
+
+  <div class="auth-card student-card">
+
+    <div class="auth-logo">
+      <span class="icon">🎓</span>
+      <h1>Student Login</h1>
+      <div class="student-badge">
+        📖 Student Access
+      </div>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">⚠️ {{ error }}</div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success">✅ {{ success }}</div>
+    {% endif %}
+<form method="POST" action="/login/student">
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input
+          type="email"
+          name="email"
+          placeholder="your@email.com"
+          required
+          value="{{ prefill_email or '' }}"
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <div class="password-wrap">
+          <input
+            type="password"
+            name="password"
+            id="student-password"
+            placeholder="Enter your password"
+            required
+            autocomplete="current-password"
+          />
+          <button type="button"
+                  class="eye-toggle"
+                  onclick="togglePwd('student-password', this)"
+                  tabindex="-1">👁</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-auth">
+        Sign In as Student
+      </button>
+
+    </form>
+
+     
+
+    <div class="divider"><span>new here?</span></div>
+
+    <div class="auth-footer">
+      <a href="/register">Register as a Student →</a>
+    </div>
+
+    <div style="background:#1a1a2e;border:1px solid #2a2a4a;
+                border-radius:8px;padding:12px 16px;
+                font-size:0.78rem;color:#555;margin-top:14px;
+                font-family:'Segoe UI',sans-serif;">
+      ⏳ New accounts need admin approval before login.
+    </div>
+
+  </div>
+  <script>
+  function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+      input.type      = "text";
+      btn.textContent = "🙈";
+    } else {
+      input.type      = "password";
+      btn.textContent = "👁";
+    }
+  }
+</script>
+
+</body>
+</html>

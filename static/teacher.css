@@ -1,0 +1,215 @@
+/* ── Teacher panel styles ─────────────────── */
+
+/* Reuse sidebar from admin.css — just change logo color */
+.sidebar-logo.teacher { color: #a06cfd; }
+
+/* ── Teacher specific stat colors ────────── */
+.stat-box.c-teal  { border-top: 3px solid #4caf82; }
+.stat-box.c-coral { border-top: 3px solid #e05260; }
+
+/* ── Camera card ──────────────────────────── */
+.cam-card {
+  background: #1a1a2e;
+  border: 1px solid #2a2a4a;
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+.cam-card h2 {
+  font-size: 0.95rem;
+  color: #a0a8ff;
+  margin-bottom: 16px;
+}
+
+#teacher-video {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 8px;
+  border: 2px solid #2a2a4a;
+  background: #000;
+  display: block;
+}
+
+/* ── Mode tabs ────────────────────────────── */
+.mode-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  background: #0f0f1a;
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.mode-tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #555;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.mode-tab.active {
+  background: #7c83fd;
+  color: #fff;
+}
+
+.mode-tab:hover:not(.active) {
+  background: #1a1a2e;
+  color: #a0a8ff;
+}
+
+/* ── Result items ─────────────────────────── */
+.result-item {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.result-success {
+  background: #0d2b1f;
+  border: 1px solid #1a5c3a;
+  color: #4caf82;
+}
+
+.result-warning {
+  background: #2b200d;
+  border: 1px solid #5c3e1a;
+  color: #e0a14c;
+}
+
+.result-error {
+  background: #2b0d0d;
+  border: 1px solid #5c1a1a;
+  color: #e05260;
+}
+
+.result-info {
+  background: #0d1a2b;
+  border: 1px solid #1a3a5c;
+  color: #4c9fe0;
+}
+
+/* ── Upload drop zone ─────────────────────── */
+.drop-zone {
+  border: 2px dashed #3a3a6a;
+  border-radius: 10px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.drop-zone:hover,
+.drop-zone.dragover {
+  border-color: #7c83fd;
+  background: #16213e;
+}
+
+.drop-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.drop-icon { font-size: 2.5rem; margin-bottom: 10px; }
+.drop-text { color: #555; font-size: 0.88rem; }
+.drop-text span { color: #7c83fd; font-weight: 600; }
+
+/* ── Video preview ────────────────────────── */
+#vid-preview {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #2a2a4a;
+  margin-top: 12px;
+  display: none;
+  max-height: 220px;
+}
+
+/* ── Progress ─────────────────────────────── */
+.progress-wrap {
+  background: #0f0f1a;
+  border-radius: 8px;
+  height: 7px;
+  margin-top: 14px;
+  overflow: hidden;
+  display: none;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #7c83fd, #4caf82);
+  border-radius: 8px;
+  width: 0%;
+  transition: width 0.3s;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+
+/* ── Student table extras ─────────────────── */
+.attendance-pct {
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.pct-high  { color: #4caf82; }
+.pct-mid   { color: #e0a14c; }
+.pct-low   { color: #e05260; }
+
+/* ── Export button ────────────────────────── */
+.btn-export {
+  background: #1a4a2a;
+  color: #4caf82;
+  border: 1px solid #1a5c3a;
+  padding: 8px 18px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.btn-export:hover {
+  background: #4caf82;
+  color: #0d2b1f;
+}
+
+/* ── Spinner ──────────────────────────────── */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #3a3a5a;
+  border-top-color: #7c83fd;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }

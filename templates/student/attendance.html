@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Attendance</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+  <link rel="stylesheet" href="/static/student.css"/>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span>🎓</span><span>Student Panel</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/student/dashboard"  class="nav-item">📊 Dashboard</a>
+      <a href="/student/attendance" class="nav-item active">📋 My Attendance</a>
+      <a href="/student/profile"    class="nav-item">👤 My Profile</a>
+      <a href="/register-face"      class="nav-item">📸 Register Face</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">{{ user.full_name[0] }}</div>
+        <div>
+          <div class="sidebar-name">{{ user.full_name }}</div>
+          <div class="sidebar-role">{{ user.dept_name }}</div>
+        </div>
+      </div>
+      <a href="/logout" class="btn-logout">Logout</a>
+    </div>
+  </aside>
+
+  <main class="panel-main">
+    <div class="panel-header">
+      <h1>📋 My Attendance</h1>
+    </div>
+
+    <!-- Summary bar -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);
+                gap:14px;margin-bottom:20px;">
+      <div class="stat-box c-green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-num">{{ stats.present }}</div>
+        <div class="stat-lbl">Days Present</div>
+      </div>
+      <div class="stat-box c-amber">
+        <div class="stat-icon">📅</div>
+        <div class="stat-num">{{ stats.total_days }}</div>
+        <div class="stat-lbl">Total Classes</div>
+      </div>
+      <div class="stat-box
+        {% if stats.percentage >= 75 %}c-green
+        {% elif stats.percentage >= 50 %}c-amber
+        {% else %}c-coral{% endif %}">
+        <div class="stat-icon">📊</div>
+        <div class="stat-num">{{ stats.percentage }}%</div>
+        <div class="stat-lbl">Attendance</div>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="panel-card" style="padding:16px 20px;
+                                    margin-bottom:18px;">
+      <div class="att-bar-wrap">
+        <div class="att-bar-label">
+          <span>Attendance Progress</span>
+          <span>{{ stats.present }}/{{ stats.total_days }}
+                classes</span>
+        </div>
+        <div class="att-bar">
+          <div class="att-bar-fill
+            {% if stats.percentage >= 75 %}bar-high
+            {% elif stats.percentage >= 50 %}bar-mid
+            {% else %}bar-low{% endif %}"
+               style="width:{{ stats.percentage }}%;">
+          </div>
+        </div>
+      </div>
+      <div style="font-size:.75rem;color:#444;margin-top:8px;">
+        {% if stats.percentage >= 75 %}
+          ✅ You meet the 75% attendance requirement.
+        {% elif stats.percentage >= 50 %}
+          ⚠️ Below 75%. Attend more classes to avoid shortage.
+        {% else %}
+          ❌ Critical — below 50% attendance!
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Filter bar -->
+    <div style="background:#1a1a2e;border:1px solid #2a2a4a;
+                border-radius:12px;padding:14px 18px;
+                margin-bottom:16px;display:flex;
+                gap:14px;flex-wrap:wrap;align-items:flex-end;">
+      <div style="display:flex;flex-direction:column;
+                  gap:5px;flex:1;min-width:140px;">
+        <label style="font-size:.72rem;color:#555;
+                      text-transform:uppercase;
+                      letter-spacing:.8px;">
+          Filter by Date
+        </label>
+        <input type="date" id="filter-date"
+               onchange="applyFilter()"
+               style="background:#0f0f1a;border:1px solid #2a2a4a;
+                      border-radius:7px;color:#e0e0e0;
+                      padding:8px 12px;font-size:.88rem;
+                      outline:none;"/>
+      </div>
+      <div style="flex:0;">
+        <button class="btn btn-secondary"
+                style="padding:8px 16px;"
+                onclick="clearFilter()">
+          ✕ Clear
+        </button>
+      </div>
+    </div>
+
+    <!-- Records table -->
+    <div class="panel-card">
+      <div class="card-header">
+        <h2>All Attendance Records</h2>
+        <span class="record-count" id="rec-count">
+          {{ records|length }} records
+        </span>
+      </div>
+
+      {% if records %}
+      <div class="table-wrap">
+        <table class="panel-table" id="att-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Day</th>
+              <th>Time</th>
+              <th>Status</th>
+              <th>Marked By</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in records %}
+            <tr>
+              <td class="td-muted">{{ loop.index }}</td>
+              <td class="td-date">{{ r.date }}</td>
+              <td class="td-muted" id="day-{{ loop.index }}">
+              </td>
+              <td>{{ r.time }}</td>
+              <td>
+                <span class="status-badge status-approved">
+                  {{ r.status }}
+                </span>
+              </td>
+              <td class="td-email">{{ r.teacher_name }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-panel">
+        <div class="empty-icon">📋</div>
+        <div>No attendance records yet.</div>
+      </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+
+<script>
+  const allRows = Array.from(
+    document.querySelectorAll("#att-table tbody tr")
+  );
+
+  // Fill day names
+  allRows.forEach((row, i) => {
+    const dateStr = row.cells[1].textContent.trim();
+    if (dateStr) {
+      const d = new Date(dateStr);
+      const dayNames = ["Sun","Mon","Tue","Wed",
+                        "Thu","Fri","Sat"];
+      row.cells[2].textContent = dayNames[d.getDay()];
+    }
+  });
+
+  function applyFilter() {
+    const dateVal = document.getElementById("filter-date")
+                            .value.trim();
+    let shown = 0;
+    allRows.forEach(row => {
+      const date = row.cells[1].textContent.trim();
+      const show = !dateVal || date === dateVal;
+      row.style.display = show ? "" : "none";
+      if (show) shown++;
+    });
+    document.getElementById("rec-count").textContent =
+      shown + " records";
+  }
+
+  function clearFilter() {
+    document.getElementById("filter-date").value = "";
+    applyFilter();
+  }
+</script>
+</body>
+</html>

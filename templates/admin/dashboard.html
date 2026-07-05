@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span>🔐</span>
+        <span>Admin Panel</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard" class="nav-item active">
+          📊 Dashboard
+        </a>
+        <a href="/admin/pending" class="nav-item">
+          ⏳ Pending Approvals
+          {% if pending_count > 0 %}
+          <span class="badge-count">{{ pending_count }}</span>
+          {% endif %}
+        </a>
+        <a href="/admin/users" class="nav-item">
+          👥 All Users
+        </a>
+        <a href="/admin/departments" class="nav-item">
+          🏛 Departments
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">{{ user.full_name[0] }}</div>
+          <div>
+            <div class="sidebar-name">{{ user.full_name }}</div>
+            <div class="sidebar-role">Administrator</div>
+          </div>
+        </div>
+        <a href="/logout" class="btn-logout">Logout</a>
+      </div>
+    </aside>
+
+    <!-- ── Main content ── -->
+    <main class="panel-main">
+      <div class="panel-header">
+        <h1>Dashboard Overview</h1>
+        <span class="panel-date" id="today-date"></span>
+      </div>
+
+      <!-- Stats cards -->
+      <div class="stats-grid">
+        <div class="stat-box c-blue">
+          <div class="stat-icon">👨‍🏫</div>
+          <div class="stat-num">{{ stats.teachers }}</div>
+          <div class="stat-lbl">Teachers</div>
+        </div>
+        <div class="stat-box c-green">
+          <div class="stat-icon">🎓</div>
+          <div class="stat-num">{{ stats.students }}</div>
+          <div class="stat-lbl">Students</div>
+        </div>
+        <div class="stat-box c-amber">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-num">{{ stats.pending }}</div>
+          <div class="stat-lbl">Pending Approvals</div>
+        </div>
+        <div class="stat-box c-purple">
+          <div class="stat-icon">🏛</div>
+          <div class="stat-num">{{ stats.departments }}</div>
+          <div class="stat-lbl">Departments</div>
+        </div>
+      </div>
+
+      <!-- Pending approvals preview -->
+      {% if pending_users %}
+      <div class="panel-card">
+        <div class="card-header">
+          <h2>⏳ Pending Approvals</h2>
+          <a href="/admin/pending" class="btn-link">View all →</a>
+        </div>
+        <table class="panel-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Registered</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in pending_users[:5] %}
+            <tr>
+              <td class="td-name">{{ u.full_name }}</td>
+              <td class="td-email">{{ u.email }}</td>
+              <td>
+                <span class="role-badge role-{{ u.role }}">
+                  {{ u.role|capitalize }}
+                </span>
+              </td>
+              <td>{{ u.dept_name }}</td>
+              <td class="td-date">{{ u.created_at[:10] }}</td>
+              <td>
+                <div class="action-row">
+                  <form method="POST" action="/admin/approve/{{ u.id }}" style="display:inline;">
+                    <button class="btn-approve" type="submit">✓ Approve</button>
+                  </form>
+                  <form method="POST" action="/admin/reject/{{ u.id }}" style="display:inline;">
+                    <button class="btn-reject" type="submit">✗ Reject</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="panel-card">
+        <div class="card-header"><h2>⏳ Pending Approvals</h2></div>
+        <div class="empty-panel">
+          <div class="empty-icon">✅</div>
+          <div>No pending approvals — all caught up!</div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Recent users -->
+      <div class="panel-card">
+        <div class="card-header">
+          <h2>👥 Recent Users</h2>
+          <a href="/admin/users" class="btn-link">View all →</a>
+        </div>
+        <table class="panel-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Department</th>
+              <th>Status</th>
+              <th>Registered</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in recent_users %}
+            <tr>
+              <td class="td-name">{{ u.full_name }}</td>
+              <td>
+                <span class="role-badge role-{{ u.role }}">
+                  {{ u.role|capitalize }}
+                </span>
+              </td>
+              <td>{{ u.dept_name }}</td>
+              <td>
+                <span class="status-badge status-{{ u.status }}">
+                  {{ u.status|capitalize }}
+                </span>
+              </td>
+              <td class="td-date">{{ u.created_at[:10] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    document.getElementById("today-date").textContent =
+      new Date().toLocaleDateString("en-IN", {
+        weekday:"long", year:"numeric",
+        month:"long", day:"numeric"
+      });
+  </script>
+</body>
+</html>

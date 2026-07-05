@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register Face — SmartAttend</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+  <link rel="stylesheet" href="/static/student.css"/>
+  <style>
+    .upload-wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+
+    .upload-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .upload-header h1 {
+      font-size: 1.4rem;
+      color: #a0a8ff;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .upload-header p {
+      color: #555;
+      font-size: 0.85rem;
+    }
+
+    /* ── Drop zone ── */
+    .photo-drop-zone {
+      border: 2px dashed #3a3a6a;
+      border-radius: 14px;
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+      background: #1a1a2e;
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .photo-drop-zone:hover,
+    .photo-drop-zone.dragover {
+      border-color: #7c83fd;
+      background: #16213e;
+    }
+
+    .photo-drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .dz-icon  { font-size: 3rem; margin-bottom: 12px; }
+    .dz-title { font-size: 1rem; color: #a0a8ff; font-weight: 600; margin-bottom: 6px; }
+    .dz-sub   { font-size: 0.82rem; color: #555; }
+    .dz-sub span { color: #7c83fd; font-weight: 600; }
+
+    /* ── Photo grid preview ── */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .photo-thumb {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 2px solid #2a2a4a;
+      background: #0f0f1a;
+    }
+
+    .photo-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo-thumb .thumb-remove {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(224,82,96,0.9);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .photo-thumb .thumb-status {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 3px 0;
+      font-size: 0.65rem;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .thumb-ok {
+      background: rgba(76,175,130,0.85);
+      color: #fff;
+    }
+
+    .thumb-fail {
+      background: rgba(224,82,96,0.85);
+      color: #fff;
+    }
+
+    /* ── Counter bar ── */
+    .counter-bar {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 10px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+    }
+
+    .counter-bar .cnt {
+      color: #7c83fd;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    /* ── Tips ── */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .tip-item {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Status box ── */
+    .status-box {
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.88rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .status-success {
+      background: #0d2b1f;
+      border: 1px solid #1a5c3a;
+      color: #4caf82;
+    }
+
+    .status-error {
+      background: #2b0d0d;
+      border: 1px solid #5c1a1a;
+      color: #e05260;
+    }
+
+    .status-info {
+      background: #0d1a2b;
+      border: 1px solid #1a3a5c;
+      color: #4c9fe0;
+    }
+
+    /* ── Progress bar ── */
+    .upload-progress {
+      background: #0f0f1a;
+      border-radius: 8px;
+      height: 8px;
+      margin-bottom: 14px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .upload-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #7c83fd, #4caf82);
+      border-radius: 8px;
+      width: 0%;
+      transition: width 0.4s;
+    }
+
+    /* ── Buttons ── */
+    .action-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-upload {
+      flex: 1;
+      padding: 13px;
+      background: linear-gradient(135deg, #7c83fd, #a06cfd);
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .btn-upload:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(124,131,253,0.4);
+    }
+
+    .btn-upload:disabled {
+      background: #2a2a4a;
+      color: #444;
+      cursor: not-allowed;
+    }
+
+    .btn-clear {
+      padding: 13px 20px;
+      background: #2a2a4a;
+      color: #a0a8ff;
+      border: 1px solid #3a3a6a;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .btn-clear:hover {
+      background: #3a3a6a;
+    }
+
+    /* ── Already registered banner ── */
+    .already-banner {
+      background: #0d2b1f;
+      border: 1px solid #1a5c3a;
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      color: #4caf82;
+    }
+  </style>
+</head>
+<body style="background:#0f0f1a;min-height:100vh;">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>📸 Face Registration</h1>
+    <a href="/" class="nav-link">← Back to Dashboard</a>
+  </div>
+
+  <div class="upload-wrap">
+
+    <!-- Page header -->
+    <div class="upload-header">
+      <h1>Hello, {{ user.full_name }} 👋</h1>
+      <p>
+        Upload up to 10 clear photos of your face.
+        The system will use these to recognize you automatically.
+      </p>
+    </div>
+
+    <!-- Already registered banner -->
+    {% if already_registered %}
+    <div class="already-banner">
+      <span style="font-size:1.4rem;">✅</span>
+      <div>
+        <strong>Face already registered.</strong>
+        Upload new photos below to update your registration.
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Tips -->
+    <div class="tips-grid">
+      <div class="tip-item">☀️ Use bright, clear photos</div>
+      <div class="tip-item">👤 Face must be clearly visible</div>
+      <div class="tip-item">📐 Different angles work better</div>
+      <div class="tip-item">🚫 No sunglasses or mask</div>
+      <div class="tip-item">📸 Max 10 photos allowed</div>
+      <div class="tip-item">🖼 JPG, PNG formats only</div>
+    </div>
+
+    <!-- Drop zone -->
+    <div class="photo-drop-zone" id="drop-zone">
+      <input
+        type="file"
+        id="photo-input"
+        accept="image/jpeg,image/jpg,image/png,image/webp"
+        multiple
+        onchange="onPhotosSelected(this)"
+      />
+      <div class="dz-icon">🖼</div>
+      <div class="dz-title">Drag & drop your photos here</div>
+      <div class="dz-sub">
+        or <span>click to browse</span> from your device<br/>
+        JPG, PNG — up to 10 photos
+      </div>
+    </div>
+
+    <!-- Counter bar (hidden until photos selected) -->
+    <div class="counter-bar" id="counter-bar" style="display:none;">
+      <div>
+        Photos selected:
+        <span class="cnt" id="photo-count">0</span> / 10
+      </div>
+      <div style="font-size:.78rem;color:#555;">
+        More photos = better recognition accuracy
+      </div>
+    </div>
+
+    <!-- Photo preview grid -->
+    <div class="photo-grid" id="photo-grid"></div>
+
+    <!-- Progress bar -->
+    <div class="upload-progress" id="upload-progress">
+      <div class="upload-progress-bar"
+           id="upload-progress-bar"></div>
+    </div>
+
+    <!-- Status box -->
+    <div class="status-box" id="status-box"></div>
+
+    <!-- Action buttons -->
+    <div class="action-row">
+      <button class="btn-clear" onclick="clearAll()">
+        ✕ Clear All
+      </button>
+      <button class="btn-upload"
+              id="btn-submit"
+              onclick="submitPhotos()"
+              disabled>
+        📸 Register Face
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    let selectedFiles = [];
+
+    // ── Drag and drop ─────────────────────────────
+    const zone = document.getElementById("drop-zone");
+
+    zone.addEventListener("dragover", e => {
+      e.preventDefault();
+      zone.classList.add("dragover");
+    });
+
+    zone.addEventListener("dragleave", () => {
+      zone.classList.remove("dragover");
+    });
+
+    zone.addEventListener("drop", e => {
+      e.preventDefault();
+      zone.classList.remove("dragover");
+      const files = Array.from(e.dataTransfer.files)
+        .filter(f => f.type.startsWith("image/"));
+      addFiles(files);
+    });
+
+    // ── File input change ─────────────────────────
+    function onPhotosSelected(input) {
+      const files = Array.from(input.files);
+      addFiles(files);
+      input.value = ""; // reset so same files can be re-added
+    }
+
+    // ── Add files to list ─────────────────────────
+    function addFiles(files) {
+      const remaining = 10 - selectedFiles.length;
+      if (remaining <= 0) {
+        showStatus("Maximum 10 photos already selected.", "error");
+        return;
+      }
+
+      const toAdd = files.slice(0, remaining);
+      selectedFiles = selectedFiles.concat(toAdd);
+
+      if (files.length > remaining) {
+        showStatus(
+          `Only ${remaining} more photo(s) allowed. ` +
+          `${files.length - remaining} photo(s) were skipped.`,
+          "info"
+        );
+      }
+
+      renderGrid();
+      updateCounter();
+    }
+
+    // ── Render photo grid ─────────────────────────
+    function renderGrid() {
+      const grid = document.getElementById("photo-grid");
+      grid.innerHTML = "";
+
+      selectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const thumb = document.createElement("div");
+          thumb.className = "photo-thumb";
+          thumb.id = `thumb-${index}`;
+          thumb.innerHTML = `
+            <img src="${e.target.result}" alt="Photo ${index+1}"/>
+            <button class="thumb-remove"
+                    onclick="removePhoto(${index})"
+                    title="Remove">✕</button>
+          `;
+          grid.appendChild(thumb);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      document.getElementById("btn-submit").disabled =
+        selectedFiles.length === 0;
+    }
+
+    // ── Remove one photo ──────────────────────────
+    function removePhoto(index) {
+      selectedFiles.splice(index, 1);
+      renderGrid();
+      updateCounter();
+      hideStatus();
+    }
+
+    // ── Update counter bar ────────────────────────
+    function updateCounter() {
+      const bar = document.getElementById("counter-bar");
+      const cnt = document.getElementById("photo-count");
+      cnt.textContent = selectedFiles.length;
+      bar.style.display =
+        selectedFiles.length > 0 ? "flex" : "none";
+    }
+
+    // ── Clear all ─────────────────────────────────
+    function clearAll() {
+      selectedFiles = [];
+      document.getElementById("photo-grid").innerHTML = "";
+      document.getElementById("btn-submit").disabled = true;
+      updateCounter();
+      hideStatus();
+    }
+
+    // ── Submit photos ─────────────────────────────
+    function submitPhotos() {
+      if (selectedFiles.length === 0) {
+        showStatus("Please select at least one photo.", "error");
+        return;
+      }
+
+      const btn      = document.getElementById("btn-submit");
+      const progress = document.getElementById("upload-progress");
+      const bar      = document.getElementById("upload-progress-bar");
+
+      btn.disabled        = true;
+      btn.textContent     = "⏳ Processing...";
+      progress.style.display = "block";
+      bar.style.width        = "0%";
+      hideStatus();
+
+      // Animate progress
+      let pct = 0;
+      const timer = setInterval(() => {
+        pct += Math.random() * 15;
+        if (pct > 85) pct = 85;
+        bar.style.width = pct + "%";
+      }, 300);
+
+      // Build FormData with actual files
+      const formData = new FormData();
+      selectedFiles.forEach(file => {
+        formData.append("photos", file);
+      });
+
+      fetch("/register-face", {
+        method: "POST",
+        body:   formData
+      })
+      .then(r => r.json())
+      .then(data => {
+        clearInterval(timer);
+        bar.style.width = "100%";
+
+        setTimeout(() => {
+          progress.style.display = "none";
+          btn.disabled    = false;
+          btn.textContent = "📸 Register Face";
+
+          if (data.success) {
+            // Mark thumbnails
+            markThumbnails(data);
+            showStatus(
+              "✅ " + data.message +
+              " Redirecting to dashboard...",
+              "success"
+            );
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 3000);
+          } else {
+            showStatus("❌ " + data.message, "error");
+          }
+        }, 500);
+      })
+      .catch(err => {
+        clearInterval(timer);
+        progress.style.display = "none";
+        bar.style.width        = "0%";
+        btn.disabled           = false;
+        btn.textContent        = "📸 Register Face";
+        showStatus("❌ Upload error: " + err.message, "error");
+      });
+    }
+
+    // ── Mark thumbnails as OK/fail ────────────────
+    function markThumbnails(data) {
+      const thumbs = document.querySelectorAll(".photo-thumb");
+      thumbs.forEach((thumb, i) => {
+        const label = document.createElement("div");
+        label.className = "thumb-status " +
+          (i < data.faces_found ? "thumb-ok" : "thumb-fail");
+        label.textContent =
+          i < data.faces_found ? "✓ Face found" : "✗ No face";
+        thumb.appendChild(label);
+      });
+    }
+
+    // ── Status helpers ────────────────────────────
+    function showStatus(msg, type) {
+      const box = document.getElementById("status-box");
+      box.className = `status-box status-${type}`;
+      box.textContent = msg;
+      box.style.display = "block";
+    }
+
+    function hideStatus() {
+      document.getElementById("status-box").style.display = "none";
+    }
+  </script>
+
+</body>
+</html>

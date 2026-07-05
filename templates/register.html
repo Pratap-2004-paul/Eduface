@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register — Smart Attendance</title>
+  <link rel="stylesheet" href="/static/auth.css"/>
+</head>
+<body class="auth-body">
+
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <span class="icon">📝</span>
+      <h1>Create Account</h1>
+      <p>Register as teacher or student</p>
+    </div>
+
+    <!-- Flash messages -->
+    {% if error %}
+    <div class="alert alert-error">⚠️ {{ error }}</div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success">✅ {{ success }}</div>
+    {% endif %}
+
+    <!-- Role selector tabs -->
+    <div class="role-tabs">
+      <button
+        class="role-tab {% if role == 'teacher' or not role %}active{% endif %}"
+        type="button"
+        onclick="setRole('teacher')"
+        id="tab-teacher"
+      >
+        👨‍🏫 Teacher
+      </button>
+      <button
+        class="role-tab {% if role == 'student' %}active{% endif %}"
+        type="button"
+        onclick="setRole('student')"
+        id="tab-student"
+      >
+        🎓 Student
+      </button>
+    </div>
+
+    <!-- Registration form -->
+    <form method="POST" action="/register">
+
+      <input type="hidden" name="role" id="role-input"
+             value="{{ role or 'teacher' }}"/>
+
+      <div class="form-group">
+        <label>Full name</label>
+        <input
+          type="text"
+          name="full_name"
+          placeholder="e.g. Rahul Singh"
+          required
+          value="{{ prefill.full_name if prefill and prefill.full_name else '' }}"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Email address</label>
+        <input
+          type="email"
+          name="email"
+          placeholder="you@example.com"
+          required
+          value="{{ prefill.email if prefill and prefill.email else '' }}"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Department</label>
+        <select name="department_id" required>
+          <option value="">-- Select department --</option>
+          {% for dept in departments %}
+          <option
+            value="{{ dept.id }}"
+            {% if prefill and prefill.dept_id == dept.id %}selected{% endif %}
+          >
+            {{ dept.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <div class="password-wrap">
+          <input
+            type="password"
+            name="password"
+            id="reg-password"
+            placeholder="Minimum 6 characters"
+            required
+            minlength="6"
+          />
+          <button type="button"
+                  class="eye-toggle"
+                  onclick="togglePwd('reg-password', this)"
+                  tabindex="-1">
+            👁
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Confirm password</label>
+        <div class="password-wrap">
+          <input
+            type="password"
+            name="confirm_password"
+            id="reg-confirm"
+            placeholder="Repeat your password"
+            required
+            minlength="6"
+          />
+          <button type="button"
+                  class="eye-toggle"
+                  onclick="togglePwd('reg-confirm', this)"
+                  tabindex="-1">
+            👁
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-auth">
+        Create Account
+      </button>
+
+    </form>
+
+    <!-- Pending notice shown after successful registration -->
+    {% if pending %}
+    <div class="pending-card" style="margin-top:20px;">
+      <span class="icon">⏳</span>
+      <h3>Account pending approval</h3>
+      <p>
+        Your account has been created. An admin will review
+        and approve your request. You will be able to login
+        once approved.
+      </p>
+    </div>
+    {% endif %}
+
+    <div class="divider"><span>already have an account?</span></div>
+
+    <div class="auth-footer">
+      <a href="/login">Sign in here</a>
+    </div>
+
+  </div>
+
+ <script>
+  function setRole(role) {
+    document.getElementById("role-input").value = role;
+    document.getElementById("tab-teacher")
+      .classList.toggle("active", role === "teacher");
+    document.getElementById("tab-student")
+      .classList.toggle("active", role === "student");
+  }
+
+  function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+      input.type      = "text";
+      btn.textContent = "🙈";
+    } else {
+      input.type      = "password";
+      btn.textContent = "👁";
+    }
+  }
+</script>
+
+</body>
+</html>

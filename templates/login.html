@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — Smart Attendance</title>
+  <link rel="stylesheet" href="/static/auth.css"/>
+</head>
+<body class="auth-body">
+
+  <div class="auth-card">
+
+    <div class="auth-logo">
+      <span class="icon">📷</span>
+      <h1>Eduface</h1>
+      <p>Sign in to your account</p>
+    </div>
+
+    <!-- Error / success flash messages -->
+    {% if error %}
+    <div class="alert alert-error">⚠️ {{ error }}</div>
+    {% endif %}
+
+    {% if success %}
+    <div class="alert alert-success">✅ {{ success }}</div>
+    {% endif %}
+
+    <!-- Login form -->
+    <form method="POST" action="/login">
+
+      <div class="form-group">
+        <label>Email address</label>
+        <input
+          type="email"
+          name="email"
+          placeholder="you@example.com"
+          required
+          value="{{ prefill_email or '' }}"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input
+          type="password"
+          name="password"
+          placeholder="Enter your password"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn-auth">Sign In</button>
+
+    </form>
+
+    <div class="divider"><span>don't have an account?</span></div>
+
+    <div class="auth-footer">
+      <a href="/register">Register as Teacher or Student</a>
+    </div>
+
+  </div>
+
+</body>
+</html>

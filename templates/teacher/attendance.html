@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mark Attendance</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+  <link rel="stylesheet" href="/static/teacher.css"/>
+  <style>
+  @keyframes livepulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.4; transform:scale(1.4); }
+  }
+
+  @keyframes slideDown {
+    from { opacity:0; transform:translateY(-8px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .att-row {
+    background: #0d2b1f;
+    border: 1px solid #1a5c3a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideDown 0.35s ease;
+  }
+
+  .att-row-name {
+    font-size: .88rem;
+    font-weight: 700;
+    color: #e0e0e0;
+    flex: 1;
+  }
+
+  .att-row-time {
+    font-size: .72rem;
+    color: #4caf82;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .att-row-new {
+    background: #0f3a28;
+    border-color: #4caf82;
+    box-shadow: 0 0 0 2px rgba(76,175,130,0.2);
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span>👨‍🏫</span><span>Teacher Panel</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/teacher/dashboard"  class="nav-item">📊 Dashboard</a>
+      <a href="/teacher/students"   class="nav-item">🎓 My Students</a>
+      <a href="/teacher/attendance" class="nav-item active">📷 Mark Attendance</a>
+      <a href="/teacher/photo-attendance" class="nav-item">
+  🖼 Photo Attendance
+</a>
+      <a href="/teacher/records"    class="nav-item">📋 Attendance Records</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">{{ user.full_name[0] }}</div>
+        <div>
+          <div class="sidebar-name">{{ user.full_name }}</div>
+          <div class="sidebar-role">{{ user.dept_name }}</div>
+        </div>
+      </div>
+      <a href="/logout" class="btn-logout">Logout</a>
+    </div>
+  </aside>
+
+  <main class="panel-main">
+    <div class="panel-header">
+      <h1>📷 Mark Attendance</h1>
+      <span style="font-size:.85rem;color:#555;">
+        {{ user.dept_name }}
+      </span>
+    </div>
+
+    <!-- Mode tabs -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tab-cam"
+              onclick="switchMode('camera')">
+        📷 Live Camera
+      </button>
+      <button class="mode-tab" id="tab-vid"
+              onclick="switchMode('video')">
+        🎬 Video Upload
+      </button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;
+                gap:20px;align-items:start;">
+
+      <!-- ── Left: Camera / Video ── -->
+      <div>
+
+        <!-- CAMERA MODE -->
+        <div id="camera-mode">
+          <div class="cam-card">
+            <h2>🎥 Live Camera Feed</h2>
+            <video id="teacher-video" autoplay playsinline></video>
+            <canvas id="teacher-canvas" style="display:none;"></canvas>
+            <div class="btn-row" style="margin-top:14px;">
+              <button class="btn btn-secondary"
+                      id="btn-start-cam"
+                      onclick="startCamera()">
+                ▶ Start Camera
+              </button>
+              <button class="btn btn-primary"
+                      id="btn-capture"
+                      onclick="captureAndRecognize()"
+                      disabled>
+                📸 Mark Attendance
+              </button>
+              <button class="btn btn-danger"
+                      id="btn-stop-cam"
+                      onclick="stopCamera()"
+                      style="display:none;">
+                ⏹ Stop
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIDEO MODE -->
+        <div id="video-mode" style="display:none;">
+          <div class="cam-card">
+            <h2>🎬 Upload Video</h2>
+            <div class="drop-zone" id="drop-zone">
+              <input type="file" id="video-file-input"
+                     accept="video/*"
+                     onchange="onVideoSelected(this)"/>
+              <div class="drop-icon">🎥</div>
+              <div class="drop-text">
+                Drag & drop video here<br/>
+                or <span>click to browse</span>
+              </div>
+            </div>
+            <video id="vid-preview" controls></video>
+            <div class="progress-wrap" id="vid-progress-wrap">
+              <div class="progress-bar" id="vid-progress-bar"></div>
+            </div>
+            <div class="btn-row" style="margin-top:14px;">
+              <button class="btn btn-secondary"
+                      onclick="clearVideo()">
+                ✕ Clear
+              </button>
+              <button class="btn btn-primary"
+                      id="btn-process-vid"
+                      onclick="processVideo()"
+                      disabled>
+                🔍 Process Video
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Right: Results ── -->
+      <div>
+        <div class="cam-card">
+          <h2>📋 Recognition Results</h2>
+          <div id="result-box">
+            <div class="result-item result-info">
+              ℹ️ Results will appear here after recognition.
+            </div>
+          </div>
+        </div>
+
+        <!-- Today's live attendance -->
+        <div class="cam-card" style="margin-top:0;">
+
+          <!-- Header -->
+          <div style="display:flex;align-items:center;
+                      justify-content:space-between;
+                      margin-bottom:14px;">
+            <div>
+              <h2 style="margin:0;font-size:.95rem;">
+                ✅ Today's Attendance
+              </h2>
+              <div style="font-size:.72rem;color:#555;
+                          margin-top:3px;" id="att-date">
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:1.6rem;font-weight:800;
+                          color:#7c83fd;line-height:1;"
+                   id="today-count">
+                {{ today_count }}
+              </div>
+              <div style="font-size:.65rem;color:#555;
+                          text-transform:uppercase;
+                          letter-spacing:.6px;">
+                Present
+              </div>
+            </div>
+          </div>
+
+          <!-- Live indicator -->
+          <div style="display:flex;align-items:center;
+                      gap:7px;margin-bottom:12px;">
+            <div id="live-dot"
+                 style="width:8px;height:8px;
+                        background:#4caf82;
+                        border-radius:50%;
+                        animation:livepulse 2s infinite;">
+            </div>
+            <span style="font-size:.72rem;color:#4caf82;
+                         font-weight:600;">
+              LIVE — updates after each scan
+            </span>
+          </div>
+
+          <!-- Attendance list -->
+          <div id="att-list"
+               style="max-height:380px;
+                      overflow-y:auto;
+                      display:flex;
+                      flex-direction:column;
+                      gap:6px;">
+            <!-- Filled by JS -->
+          </div>
+
+          <!-- Empty state -->
+          <div id="att-empty"
+               style="display:none;text-align:center;
+                      padding:32px 16px;color:#444;">
+            <div style="font-size:2rem;margin-bottom:8px;">
+              📋
+            </div>
+            <div style="font-size:.85rem;">
+              No attendance marked yet today.
+            </div>
+            <div style="font-size:.75rem;color:#333;
+                        margin-top:6px;">
+              Mark attendance using camera or photo above.
+            </div>
+          </div>
+
+        </div>
+    </div><!-- end grid -->
+  </main>
+</div>
+
+<script>
+  // ── State ─────────────────────────────────────
+  let videoStream   = null;
+  let selectedVideo = null;
+  const deptId      = {{ user.dept_id }};
+
+  // ── Set today date label ──────────────────────
+  window.onload = function () {
+    const now = new Date();
+    document.getElementById("att-date").textContent =
+      now.toLocaleDateString("en-IN", {
+        weekday: "long",
+        year:    "numeric",
+        month:   "long",
+        day:     "numeric"
+      });
+
+    // Load today's attendance on page open
+    loadTodayAttendance(false);
+
+    // Drag and drop for video
+    const zone = document.getElementById("drop-zone");
+    if (zone) {
+      zone.addEventListener("dragover", e => {
+        e.preventDefault();
+        zone.classList.add("dragover");
+      });
+      zone.addEventListener("dragleave", () => {
+        zone.classList.remove("dragover");
+      });
+      zone.addEventListener("drop", e => {
+        e.preventDefault();
+        zone.classList.remove("dragover");
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith("video/")) {
+          selectedVideo = file;
+          const preview =
+            document.getElementById("vid-preview");
+          preview.src = URL.createObjectURL(file);
+          preview.style.display = "block";
+          document.getElementById(
+            "btn-process-vid"
+          ).disabled = false;
+        }
+      });
+    }
+  };
+
+  // ══════════════════════════════════════════════
+  //  LOAD TODAY ATTENDANCE
+  // ══════════════════════════════════════════════
+
+  function loadTodayAttendance(highlightNew) {
+    fetch("/teacher/today-records?dept_id=" + deptId)
+      .then(r => r.json())
+      .then(d => {
+        renderAttList(d.records || [], highlightNew);
+        document.getElementById("today-count")
+                .textContent = (d.records || []).length;
+      })
+      .catch(() => {});
+  }
+
+  function renderAttList(records, highlightNew) {
+    const list  = document.getElementById("att-list");
+    const empty = document.getElementById("att-empty");
+
+    if (!records || records.length === 0) {
+      list.innerHTML   = "";
+      empty.style.display = "block";
+      return;
+    }
+
+    empty.style.display = "none";
+
+    // Sort newest first
+    const sorted = [...records].reverse();
+
+    list.innerHTML = sorted.map((r, idx) => {
+      const isNew = highlightNew && idx === 0;
+      return `
+        <div class="att-row ${isNew ? "att-row-new" : ""}">
+          <span style="font-size:1rem;">✅</span>
+          <div class="att-row-name">${r.student_name}</div>
+          <div class="att-row-time">${r.time}</div>
+        </div>`;
+    }).join("");
+  }
+
+  // ══════════════════════════════════════════════
+  //  AFTER MARKING — refresh list
+  // ══════════════════════════════════════════════
+
+  function afterMark() {
+    // Small delay so DB write completes
+    setTimeout(() => {
+      loadTodayAttendance(true);
+    }, 400);
+  }
+
+  // ── Mode switching ────────────────────────────
+  function switchMode(mode) {
+    const isCamera = mode === "camera";
+    document.getElementById("camera-mode").style.display =
+      isCamera ? "block" : "none";
+    document.getElementById("video-mode").style.display  =
+      isCamera ? "none"  : "block";
+    document.getElementById("tab-cam").classList
+      .toggle("active", isCamera);
+    document.getElementById("tab-vid").classList
+      .toggle("active", !isCamera);
+    if (!isCamera) stopCamera();
+  }
+
+  // ── Camera ────────────────────────────────────
+  function startCamera() {
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: false })
+      .then(stream => {
+        videoStream = stream;
+        document.getElementById(
+          "teacher-video"
+        ).srcObject = stream;
+        document.getElementById(
+          "btn-start-cam"
+        ).style.display = "none";
+        document.getElementById(
+          "btn-capture"
+        ).disabled = false;
+        document.getElementById(
+          "btn-stop-cam"
+        ).style.display = "inline-block";
+        showResult(
+          "✅ Camera ready. Click Mark Attendance.",
+          "info"
+        );
+      })
+      .catch(err => {
+        showResult("❌ Camera error: " + err.message, "error");
+      });
+  }
+
+  function stopCamera() {
+    if (videoStream) {
+      videoStream.getTracks().forEach(t => t.stop());
+      videoStream = null;
+      document.getElementById(
+        "teacher-video"
+      ).srcObject = null;
+    }
+    document.getElementById(
+      "btn-start-cam"
+    ).style.display = "inline-block";
+    document.getElementById("btn-capture").disabled = true;
+    document.getElementById(
+      "btn-stop-cam"
+    ).style.display = "none";
+  }
+
+  function captureAndRecognize() {
+    if (!videoStream) return;
+    const video  = document.getElementById("teacher-video");
+    const canvas = document.getElementById("teacher-canvas");
+    canvas.width  = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    const imageData = canvas.toDataURL("image/jpeg", 0.9);
+
+    document.getElementById("btn-capture").disabled = true;
+    showResult(
+      '<div class="spinner"></div> Recognizing...',
+      "info"
+    );
+
+    fetch("/teacher/recognize", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        image:   imageData,
+        dept_id: deptId
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("btn-capture").disabled = false;
+      handleCamResult(data);
+      afterMark(); // ← refresh attendance list
+    })
+    .catch(err => {
+      document.getElementById("btn-capture").disabled = false;
+      showResult("❌ Error: " + err.message, "error");
+    });
+  }
+
+  function handleCamResult(data) {
+    const box = document.getElementById("result-box");
+    box.innerHTML = "";
+    if (!data.success && !data.results) {
+      addResult(box, "❌ " + data.message, "error");
+      return;
+    }
+    if (data.results && data.results.length > 0) {
+      data.results.forEach(r => {
+        if (r.name === "Unknown") {
+          addResult(box,
+            "❓ Unknown face — not in your dept.",
+            "error");
+        } else if (r.success) {
+          addResult(box, "✅ " + r.message, "success");
+        } else {
+          addResult(box, "⚠️ " + r.message, "warning");
+        }
+      });
+    } else {
+      addResult(box,
+        "❌ " + (data.message || "No face detected."),
+        "error");
+    }
+  }
+
+  // ── Video upload ──────────────────────────────
+  function onVideoSelected(input) {
+    if (input.files && input.files[0]) {
+      selectedVideo = input.files[0];
+      const preview = document.getElementById("vid-preview");
+      preview.src = URL.createObjectURL(selectedVideo);
+      preview.style.display = "block";
+      document.getElementById(
+        "btn-process-vid"
+      ).disabled = false;
+    }
+  }
+
+  function clearVideo() {
+    selectedVideo = null;
+    document.getElementById("video-file-input").value = "";
+    document.getElementById(
+      "vid-preview"
+    ).style.display = "none";
+    document.getElementById("vid-preview").src = "";
+    document.getElementById(
+      "btn-process-vid"
+    ).disabled = true;
+    document.getElementById(
+      "vid-progress-wrap"
+    ).style.display = "none";
+  }
+
+  function processVideo() {
+    if (!selectedVideo) return;
+
+    const progressWrap = document.getElementById(
+      "vid-progress-wrap"
+    );
+    const progressBar = document.getElementById(
+      "vid-progress-bar"
+    );
+    const btn = document.getElementById("btn-process-vid");
+
+    progressWrap.style.display = "block";
+    progressBar.style.width    = "0%";
+    btn.disabled               = true;
+    btn.textContent            = "⏳ Processing...";
+    showResult(
+      '<div class="spinner"></div> Processing video...',
+      "info"
+    );
+
+    let fake = 0;
+    const timer = setInterval(() => {
+      fake += Math.random() * 10;
+      if (fake > 90) fake = 90;
+      progressBar.style.width = fake + "%";
+    }, 400);
+
+    const formData = new FormData();
+    formData.append("video",   selectedVideo);
+    formData.append("dept_id", deptId);
+
+    fetch("/teacher/process-video", {
+      method: "POST",
+      body:   formData
+    })
+    .then(r => r.json())
+    .then(data => {
+      clearInterval(timer);
+      progressBar.style.width = "100%";
+      btn.disabled    = false;
+      btn.textContent = "🔍 Process Video";
+      setTimeout(() => {
+        progressWrap.style.display = "none";
+      }, 600);
+      handleVideoResult(data);
+      afterMark(); // ← refresh attendance list
+    })
+    .catch(err => {
+      clearInterval(timer);
+      progressWrap.style.display = "none";
+      btn.disabled    = false;
+      btn.textContent = "🔍 Process Video";
+      showResult("❌ Error: " + err.message, "error");
+    });
+  }
+
+  function handleVideoResult(data) {
+    const box = document.getElementById("result-box");
+    box.innerHTML = "";
+    if (!data.success) {
+      addResult(box, "❌ " + data.message, "error");
+      return;
+    }
+    addResult(box,
+      `📹 Video: ${data.video_duration}s, ` +
+      `${data.frames_checked} frames checked.`,
+      "info"
+    );
+    if (!data.results || data.results.length === 0) {
+      addResult(box,
+        "😕 No registered students found.",
+        "error");
+      return;
+    }
+    data.results.forEach(r => {
+      if (r.marked) {
+        addResult(box,
+          `✅ ${r.name} marked present ` +
+          `(${r.seen_count} frames)`,
+          "success");
+      } else {
+        addResult(box,
+          `⚠️ ${r.name} already marked today`,
+          "warning");
+      }
+    });
+  }
+
+  // ── UI helpers ────────────────────────────────
+  function showResult(html, type) {
+    document.getElementById("result-box").innerHTML =
+      `<div class="result-item result-${type}">${html}</div>`;
+  }
+
+  function addResult(box, html, type) {
+    const d = document.createElement("div");
+    d.className = `result-item result-${type}`;
+    d.innerHTML = html;
+    box.appendChild(d);
+  }
+</script>
+</body>
+</html>

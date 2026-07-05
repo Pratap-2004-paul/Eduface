@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pending Approvals</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+  <link rel="stylesheet" href="/static/admin.css"/>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><span>🔐</span><span>Admin Panel</span></div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard" class="nav-item">📊 Dashboard</a>
+        <a href="/admin/pending" class="nav-item active">
+          ⏳ Pending Approvals
+          {% if pending_count > 0 %}
+          <span class="badge-count">{{ pending_count }}</span>
+          {% endif %}
+        </a>
+        <a href="/admin/users" class="nav-item">👥 All Users</a>
+        <a href="/admin/departments" class="nav-item">🏛 Departments</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">{{ user.full_name[0] }}</div>
+          <div>
+            <div class="sidebar-name">{{ user.full_name }}</div>
+            <div class="sidebar-role">Administrator</div>
+          </div>
+        </div>
+        <a href="/logout" class="btn-logout">Logout</a>
+      </div>
+    </aside>
+
+    <main class="panel-main">
+      <div class="panel-header">
+        <h1>⏳ Pending Approvals</h1>
+      </div>
+
+      {% if message %}
+      <div class="alert-panel {{ message_type }}">{{ message }}</div>
+      {% endif %}
+
+      {% if users %}
+      <div class="panel-card">
+        <div class="card-header">
+          <h2>Requests waiting for review</h2>
+          <span class="record-count">{{ users|length }} request(s)</span>
+        </div>
+        <div class="table-wrap">
+          <table class="panel-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Department</th>
+                <th>Registered</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in users %}
+              <tr>
+                <td class="td-muted">{{ loop.index }}</td>
+                <td class="td-name">{{ u.full_name }}</td>
+                <td class="td-email">{{ u.email }}</td>
+                <td>
+                  <span class="role-badge role-{{ u.role }}">
+                    {{ u.role|capitalize }}
+                  </span>
+                </td>
+                <td>{{ u.dept_name }}</td>
+                <td class="td-date">{{ u.created_at[:10] }}</td>
+                <td>
+                  <div class="action-row">
+                    <form method="POST"
+                          action="/admin/approve/{{ u.id }}">
+                      <button class="btn-approve" type="submit">
+                        ✓ Approve
+                      </button>
+                    </form>
+                    <form method="POST"
+                          action="/admin/reject/{{ u.id }}">
+                      <button class="btn-reject" type="submit">
+                        ✗ Reject
+                      </button>
+                    </form>
+                    <form method="POST"
+                          action="/admin/delete/{{ u.id }}"
+                          onsubmit="return confirm('Delete this user permanently?')">
+                      <button class="btn-delete" type="submit">
+                        🗑
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% else %}
+      <div class="panel-card">
+        <div class="empty-panel">
+          <div class="empty-icon">🎉</div>
+          <div>No pending requests right now!</div>
+        </div>
+      </div>
+      {% endif %}
+    </main>
+  </div>
+</body>
+</html>
